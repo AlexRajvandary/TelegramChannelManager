@@ -1,0 +1,9 @@
+﻿namespace TelegramChannelManager.Server.Services
+{
+    public enum UserState
+    {
+        None,
+        AwaitingToken,
+        BotClientCreated
+    }
+}
