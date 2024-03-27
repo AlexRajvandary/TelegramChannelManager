@@ -5,7 +5,6 @@ namespace TelegramChannelManager.Server.Commands
 {
     public class ExecutedCommandParapms
     {
-
         public ExecutedCommandParapms(Message sentMessage) : this(sentMessage, null)
         {
             SentMessage = sentMessage;

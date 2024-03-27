@@ -5,7 +5,7 @@ using Telegram.Bot.Types;
 using TelegramChannelManager.Server.Commands;
 using TelegramChannelManager.Server.Extensions;
 
-namespace TelegramChannelManager.Server.Services
+namespace TelegramChannelManager.Server.Services.UpdateHandlers
 {
     public class MainBotHandlers : UpdateHandlers
     {
@@ -76,7 +76,7 @@ namespace TelegramChannelManager.Server.Services
                     {
                         return await userContext.ExecuteCommand(_botClient, command, cancellationToken);
                     }
-                    else if(command is StartCommand)
+                    else if (command is StartCommand)
                     {
                         return await userContext.ExecuteCommand(_botClient, _commands[typeof(UsageCommand).GetCommandName()], cancellationToken);
                     }

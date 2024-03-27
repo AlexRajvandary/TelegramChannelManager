@@ -1,7 +1,7 @@
 using Telegram.Bot;
-using TelegramChannelManager.Server.Controllers;
 using TelegramChannelManager.Server.Extensions;
 using TelegramChannelManager.Server.Services;
+using TelegramChannelManager.Server.Services.UpdateHandlers;
 
 namespace TelegramChannelManager.Server
 {
@@ -22,7 +22,9 @@ namespace TelegramChannelManager.Server
                     return new TelegramBotClient(options, httpClient);
                 });
 
-            builder.Services.AddScoped<MainBotUpdateHandlers>();
+            builder.Services.AddSingleton<IUserContextManager, UserContextManager>();
+            builder.Services.AddScoped<MainBotHandlers>();
+            builder.Services.AddScoped<CustomerBotHandlers>();
             builder.Services.AddHostedService<ConfigureWebhook>();
 
             builder.Services

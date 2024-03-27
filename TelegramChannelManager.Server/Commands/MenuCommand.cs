@@ -13,12 +13,12 @@ namespace TelegramChannelManager.Server.Commands
                     {
                         new []
                         {
-                            InlineKeyboardButton.WithCallbackData("Новый пост", "/newPost")
+                            InlineKeyboardButton.WithCallbackData("Новый пост", "/newpost")
                         },
 
                         new []
                         {
-                            InlineKeyboardButton.WithCallbackData("Сохранённые посты", "/savedPosts"),
+                            InlineKeyboardButton.WithCallbackData("Сохранённые посты", "/savedposts"),
                         }
                     });
 
@@ -29,6 +29,14 @@ namespace TelegramChannelManager.Server.Commands
                 cancellationToken: cancellationToken);
 
             return new ExecutedCommandParapms(message);
+        }
+    }
+
+    public class SavedPostsCommand : ICommand
+    {
+        public Task<ExecutedCommandParapms> ExecuteAsync(ITelegramBotClient botClient, ChatId chatId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

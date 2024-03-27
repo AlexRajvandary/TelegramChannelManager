@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot.Types;
-using TelegramChannelManager.Server.Filters;
-using TelegramChannelManager.Server.Services;
+using TelegramChannelManager.Server.Services.UpdateHandlers;
 
 namespace TelegramChannelManager.Server.Controllers;
 

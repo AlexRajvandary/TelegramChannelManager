@@ -1,7 +1,7 @@
 ﻿using Telegram.Bot.Types;
 using TelegramChannelManager.Server.Commands;
 
-namespace TelegramChannelManager.Server.Services
+namespace TelegramChannelManager.Server.Services.UpdateHandlers
 {
     public abstract class UpdateHandlers
     {
@@ -29,7 +29,7 @@ namespace TelegramChannelManager.Server.Services
         }
 
         public abstract Task<Message?> BotOnMessageReceived(Message message, CancellationToken cancellationToken);
-    
+
         public abstract Task<Message?> BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken);
 
         public Task UnknownUpdateHandlerAsync(Update update, CancellationToken cancellationToken)
@@ -42,24 +42,6 @@ namespace TelegramChannelManager.Server.Services
         {
             _logger.LogInformation("Unknown command: {command}", command);
             return Task.CompletedTask;
-        }
-    }
-
-    public class CustomerBotHandlers : UpdateHandlers
-    {
-        public CustomerBotHandlers(ILogger<UpdateHandlers> logger,
-                                   IUserContextManager userContextManager) : base(logger, userContextManager)
-        {
-        }
-
-        public override Task BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task BotOnMessageReceived(Message message, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
         }
     }
 }

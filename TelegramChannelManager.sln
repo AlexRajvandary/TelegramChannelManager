@@ -5,6 +5,12 @@ VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelegramChannelManager.Server", "TelegramChannelManager.Server\TelegramChannelManager.Server.csproj", "{C34F9B08-1F54-44F2-AE02-6EF1191FFD5F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "Entities\Entities.csproj", "{8F459205-42B5-4ED0-B772-37F7CE4926C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "Repository\Repository.csproj", "{8288ADCF-1E8E-4C71-8215-860B05A0BC96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "Contracts\Contracts.csproj", "{0A868D01-DEC4-4F7F-B7CF-F050172C3FD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +21,18 @@ Global
 		{C34F9B08-1F54-44F2-AE02-6EF1191FFD5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C34F9B08-1F54-44F2-AE02-6EF1191FFD5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C34F9B08-1F54-44F2-AE02-6EF1191FFD5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F459205-42B5-4ED0-B772-37F7CE4926C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F459205-42B5-4ED0-B772-37F7CE4926C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F459205-42B5-4ED0-B772-37F7CE4926C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F459205-42B5-4ED0-B772-37F7CE4926C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8288ADCF-1E8E-4C71-8215-860B05A0BC96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8288ADCF-1E8E-4C71-8215-860B05A0BC96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8288ADCF-1E8E-4C71-8215-860B05A0BC96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8288ADCF-1E8E-4C71-8215-860B05A0BC96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A868D01-DEC4-4F7F-B7CF-F050172C3FD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A868D01-DEC4-4F7F-B7CF-F050172C3FD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A868D01-DEC4-4F7F-B7CF-F050172C3FD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A868D01-DEC4-4F7F-B7CF-F050172C3FD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,6 +4,10 @@
     {
         None,
         AwaitingToken,
-        BotClientCreated
+        BotClientCreated,
+        AwaitingNewPostTitle,
+        AwaitingNewPostContent,
+        AwaitingNewPostReactions,
+        AwaitingNewPostPhotos
     }
 }
