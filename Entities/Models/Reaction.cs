@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TelegramChannelManager.Server.Models
+namespace Entities.Models
 {
     public class Reaction
     {

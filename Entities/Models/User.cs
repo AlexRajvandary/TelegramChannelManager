@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TelegramChannelManager.Server.Models
+namespace Entities.Models
 {
     public class User
     {
@@ -9,5 +9,4 @@ namespace TelegramChannelManager.Server.Models
 
         public long ChatId { get; set; }
     }
-
 }
