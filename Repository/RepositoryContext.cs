@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TelegramChannelManager.Server.Models;
+﻿using Entities.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Repository
 {
@@ -11,5 +11,9 @@ namespace Repository
         }
 
         public DbSet<Post>? Posts { get; set; }
+
+        public DbSet<Post>? Reactions { get; set; }
+
+        public DbSet<Post>? User { get; set; }
     }
 }
