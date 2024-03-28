@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Contracts;
+using Microsoft.Extensions.Options;
+using Repository;
 
 namespace TelegramChannelManager.Server.Extensions
 {
-    public static class WebHookExtensions
+    public static class ServiceExtensions
     {
         public static T GetConfiguration<T>(this IServiceProvider serviceProvider)
             where T : class
@@ -26,5 +28,9 @@ namespace TelegramChannelManager.Server.Extensions
                 pattern: route,
                 defaults: new { controller = controllerName, action = actionName });
         }
+
+        public static void ConfigureRepositoryManager(this IServiceCollection services) =>
+                    services.AddScoped<IRepositoryManager, RepositoryManager>();
+
     }
 }

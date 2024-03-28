@@ -26,6 +26,7 @@ namespace TelegramChannelManager.Server
             builder.Services.AddScoped<MainBotHandlers>();
             builder.Services.AddScoped<CustomerBotHandlers>();
             builder.Services.AddHostedService<ConfigureWebhook>();
+            builder.Services.ConfigureRepositoryManager();
 
             builder.Services
             .AddControllers()
