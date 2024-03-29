@@ -7,6 +7,8 @@ namespace Entities.Models
         [Column("ReactionId")]
         public Guid Id { get; set; }
 
+        public ReactionType Type { get; set; }
+
         public int Quantity { get; set; }
 
         [ForeignKey(nameof(Post))]
@@ -14,5 +16,4 @@ namespace Entities.Models
 
         public Post Post { get; set; }
     }
-
 }

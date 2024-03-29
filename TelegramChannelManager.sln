@@ -5,11 +5,17 @@ VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelegramChannelManager.Server", "TelegramChannelManager.Server\TelegramChannelManager.Server.csproj", "{C34F9B08-1F54-44F2-AE02-6EF1191FFD5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "Entities\Entities.csproj", "{8F459205-42B5-4ED0-B772-37F7CE4926C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Entities", "Entities\Entities.csproj", "{8F459205-42B5-4ED0-B772-37F7CE4926C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "Repository\Repository.csproj", "{8288ADCF-1E8E-4C71-8215-860B05A0BC96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repository", "Repository\Repository.csproj", "{8288ADCF-1E8E-4C71-8215-860B05A0BC96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "Contracts\Contracts.csproj", "{0A868D01-DEC4-4F7F-B7CF-F050172C3FD1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts", "Contracts\Contracts.csproj", "{0A868D01-DEC4-4F7F-B7CF-F050172C3FD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Contracts", "Service.Contracts\Service.Contracts.csproj", "{103EE8B5-9A98-437A-9C76-E849BADDFAA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.csproj", "{44B69EA4-F375-467A-AB82-811731EE86D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerService", "LoggerService\LoggerService.csproj", "{3D32BD49-CC90-42A0-AE29-153F30DA0E17}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +39,18 @@ Global
 		{0A868D01-DEC4-4F7F-B7CF-F050172C3FD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A868D01-DEC4-4F7F-B7CF-F050172C3FD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A868D01-DEC4-4F7F-B7CF-F050172C3FD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{103EE8B5-9A98-437A-9C76-E849BADDFAA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{103EE8B5-9A98-437A-9C76-E849BADDFAA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{103EE8B5-9A98-437A-9C76-E849BADDFAA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{103EE8B5-9A98-437A-9C76-E849BADDFAA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44B69EA4-F375-467A-AB82-811731EE86D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44B69EA4-F375-467A-AB82-811731EE86D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44B69EA4-F375-467A-AB82-811731EE86D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44B69EA4-F375-467A-AB82-811731EE86D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D32BD49-CC90-42A0-AE29-153F30DA0E17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D32BD49-CC90-42A0-AE29-153F30DA0E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D32BD49-CC90-42A0-AE29-153F30DA0E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D32BD49-CC90-42A0-AE29-153F30DA0E17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

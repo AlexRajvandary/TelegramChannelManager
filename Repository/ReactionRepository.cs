@@ -8,5 +8,9 @@ namespace Repository
         public ReactionRepository(RepositoryContext repositoryContext) : base(repositoryContext)
         {
         }
+
+        public IEnumerable<Reaction> GetAllReactions(bool trackChanges) => FindAll(trackChanges)
+                                                                           .OrderBy(c => c.Id)
+                                                                           .ToList();
     }
 }
