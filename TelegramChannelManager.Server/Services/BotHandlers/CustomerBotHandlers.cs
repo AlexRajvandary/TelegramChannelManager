@@ -2,7 +2,7 @@
 using TelegramChannelManager.Server.Commands;
 using TelegramChannelManager.Server.Extensions;
 
-namespace TelegramChannelManager.Server.Services.UpdateHandlers
+namespace TelegramChannelManager.Server.Services.BotHandlers
 {
     public class CustomerBotHandlers : UpdateHandlers
     {
@@ -58,7 +58,6 @@ namespace TelegramChannelManager.Server.Services.UpdateHandlers
                 case UserState.AwaitingNewPostPhotos:
 
                     break;
-
             }
 
             return null;

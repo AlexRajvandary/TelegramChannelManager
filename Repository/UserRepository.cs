@@ -8,5 +8,23 @@ namespace Repository
         public UserRepository(RepositoryContext repositoryContext) : base(repositoryContext)
         {
         }
+
+        public void CreateUser(User user) => Create(user);
+
+        public void DeleteUser(Guid userId)
+        {
+            var user = GetUser(userId, true);
+
+            if(user != null)
+            {
+                Delete(user);
+            }
+        }
+
+        public void DeleteUser(User user) => Delete(user);
+
+        public User? GetUser(Guid userId, bool trackChanges) => FindByCondition(user => user.Id == userId, trackChanges).FirstOrDefault();
+
+        public void UpdateUser(User user) => Update(user);
     }
 }

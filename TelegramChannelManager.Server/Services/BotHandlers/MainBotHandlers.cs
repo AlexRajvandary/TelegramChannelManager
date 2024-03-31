@@ -5,7 +5,7 @@ using Telegram.Bot.Types;
 using TelegramChannelManager.Server.Commands;
 using TelegramChannelManager.Server.Extensions;
 
-namespace TelegramChannelManager.Server.Services.UpdateHandlers
+namespace TelegramChannelManager.Server.Services.BotHandlers
 {
     public class MainBotHandlers : UpdateHandlers
     {

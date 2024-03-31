@@ -12,5 +12,14 @@ namespace Repository
         public IEnumerable<Reaction> GetAllReactions(bool trackChanges) => FindAll(trackChanges)
                                                                            .OrderBy(c => c.Id)
                                                                            .ToList();
+
+        public IEnumerable<Reaction> GetPostReactions(Guid postId, bool trackChanges)
+        {
+            return FindByCondition(reaction => reaction.PostID == postId, trackChanges);
+        }
+
+        public void Update(Reaction reaction) => base.Update(reaction);
+
+        public void Delete(Reaction reaction) => base.Delete(reaction);
     }
 }
