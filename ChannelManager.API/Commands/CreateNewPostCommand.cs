@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
+using ChannelManager.API.Commands;
 using ChannelManager.API.Services;
 
 namespace ChannelManager.API.Commands

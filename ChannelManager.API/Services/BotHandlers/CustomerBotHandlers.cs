@@ -1,5 +1,5 @@
-﻿using Telegram.Bot.Types;
-using ChannelManager.API.Commands;
+﻿using ChannelManager.API.Commands;
+using Telegram.Bot.Types;
 using ChannelManager.API.Extensions;
 
 namespace ChannelManager.API.Services.BotHandlers

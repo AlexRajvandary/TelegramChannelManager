@@ -1,9 +1,9 @@
 using Telegram.Bot;
-using TelegramChannelManager.Server.Extensions;
-using TelegramChannelManager.Server.Services;
-using TelegramChannelManager.Server.Services.UpdateHandlers;
+using ChannelManager.API.Extensions;
+using ChannelManager.API.Services;
+using ChannelManager.API.Services.UpdateHandlers;
 
-namespace TelegramChannelManager.Server
+namespace ChannelManager.API
 {
     public class Program
     {

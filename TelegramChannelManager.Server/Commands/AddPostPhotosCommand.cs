@@ -1,8 +1,8 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
-using TelegramChannelManager.Server.Services;
+using ChannelManager.API.Services;
 
-namespace TelegramChannelManager.Server.Commands
+namespace ChannelManager.API.Commands
 {
     public class AddPostPhotosCommand : ICommand
     {

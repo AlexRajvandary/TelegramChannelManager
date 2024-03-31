@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggerService", "LoggerService\LoggerService.csproj", "{3D32BD49-CC90-42A0-AE29-153F30DA0E17}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChannelManager.API", "ChannelManager.API\ChannelManager.API.csproj", "{FBCDEF6E-9F0E-4D01-A6EF-83511D4E7C9F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{3D32BD49-CC90-42A0-AE29-153F30DA0E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D32BD49-CC90-42A0-AE29-153F30DA0E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D32BD49-CC90-42A0-AE29-153F30DA0E17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBCDEF6E-9F0E-4D01-A6EF-83511D4E7C9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBCDEF6E-9F0E-4D01-A6EF-83511D4E7C9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBCDEF6E-9F0E-4D01-A6EF-83511D4E7C9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBCDEF6E-9F0E-4D01-A6EF-83511D4E7C9F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

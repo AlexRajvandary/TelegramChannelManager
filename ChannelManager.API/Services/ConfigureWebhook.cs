@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot;
+using ChannelManager.API;
 
 namespace ChannelManager.API.Services
 {
