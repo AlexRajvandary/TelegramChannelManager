@@ -19,8 +19,6 @@ namespace Repository
 
         public IEnumerable<Post> GetPosts(Guid userId) => FindByCondition(post => post.UserId == userId, true) ?? Enumerable.Empty<Post>();
 
-        public void Update(Post post) => base.Update(post);
-
         public void DeletePost(Guid postId) => base.Delete(GetPost(postId));
 
         public void DeletePost(Post post) => base.Delete(post);

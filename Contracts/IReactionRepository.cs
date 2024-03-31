@@ -4,8 +4,8 @@ namespace Contracts
 {
     public interface IReactionRepository
     {
-        IEnumerable<Reaction> GetAllReactions(bool trackChanges);
-
         IEnumerable<Reaction> GetPostReactions(Guid postId, bool trackChanges);
+
+        void Update(Reaction reaction);
     }
 }

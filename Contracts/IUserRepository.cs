@@ -8,6 +8,8 @@ namespace Contracts
 
         User? GetUser(Guid userId, bool trackChanges);
 
+        IEnumerable<User> GetAllUsers();
+
         void UpdateUser(User user);
 
         void DeleteUser(Guid userId);

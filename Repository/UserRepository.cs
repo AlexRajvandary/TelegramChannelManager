@@ -23,6 +23,8 @@ namespace Repository
 
         public void DeleteUser(User user) => Delete(user);
 
+        public IEnumerable<User> GetAllUsers() => FindAll(false);
+
         public User? GetUser(Guid userId, bool trackChanges) => FindByCondition(user => user.Id == userId, trackChanges).FirstOrDefault();
 
         public void UpdateUser(User user) => Update(user);

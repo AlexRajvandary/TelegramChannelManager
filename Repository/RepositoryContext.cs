@@ -12,8 +12,10 @@ namespace Repository
 
         public DbSet<Post>? Posts { get; set; }
 
-        public DbSet<Post>? Reactions { get; set; }
+        public DbSet<PostTemplate>? PostTemplates { get; set; }
 
-        public DbSet<Post>? User { get; set; }
+        public DbSet<Reaction>? Reactions { get; set; }
+
+        public DbSet<User>? User { get; set; }
     }
 }

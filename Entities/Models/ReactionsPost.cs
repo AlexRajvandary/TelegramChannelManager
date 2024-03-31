@@ -2,7 +2,7 @@
 
 namespace Entities.Models
 {
-    public class Reaction
+    public class ReactionsPost
     {
         [Column("ReactionId")]
         public Guid Id { get; set; }
@@ -13,5 +13,10 @@ namespace Entities.Models
         public Guid PostID { get; set; }
 
         public Post Post { get; set; }
+
+        [ForeignKey(nameof(User))]
+        public Guid UserId { get; set; }
+
+        public User User { get; set; }
     }
 }
