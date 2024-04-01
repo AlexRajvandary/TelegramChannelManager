@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot.Types;
 using ChannelManager.API.Services.BotHandlers;
+using Service.Contracts;
 
 namespace ChannelManager.API.Controllers;
 
@@ -8,6 +9,13 @@ namespace ChannelManager.API.Controllers;
 [Route("/")]
 public class BotController : ControllerBase
 {
+    private IServiceManager _serviceManager;
+
+    public BotController(IServiceManager serviceManager)
+    {
+        _serviceManager = serviceManager;
+    }
+
     [HttpPost]
     [Route("/mainBot")]
     public async Task<IActionResult> UpdateFromMainBot(

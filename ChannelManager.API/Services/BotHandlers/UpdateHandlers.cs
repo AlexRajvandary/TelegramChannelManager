@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot.Types;
 using ChannelManager.API.Commands;
+using Service.Contracts;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
@@ -7,13 +8,16 @@ namespace ChannelManager.API.Services.BotHandlers
     {
         protected readonly ILogger<UpdateHandlers> _logger;
         protected readonly IUserContextManager _userContextManager;
+        protected readonly IServiceManager _serviceManager;
         protected Dictionary<string, ICommand> _commands;
 
         public UpdateHandlers(ILogger<UpdateHandlers> logger,
-                              IUserContextManager userContextManager)
+                              IUserContextManager userContextManager,
+                              IServiceManager serviceManager)
         {
             _logger = logger;
             _userContextManager = userContextManager;
+            _serviceManager = serviceManager;
         }
 
         public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)

@@ -1,13 +1,16 @@
 ﻿using ChannelManager.API.Commands;
 using Telegram.Bot.Types;
 using ChannelManager.API.Extensions;
+using Entities.Models;
+using Service.Contracts;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
     public class CustomerBotHandlers : UpdateHandlers
     {
         public CustomerBotHandlers(ILogger<UpdateHandlers> logger,
-                                   IUserContextManager userContextManager) : base(logger, userContextManager)
+                                   IUserContextManager userContextManager,
+                                   IServiceManager serviceManager) : base(logger, userContextManager, serviceManager)
         {
         }
 
@@ -43,17 +46,33 @@ namespace ChannelManager.API.Services.BotHandlers
                     }
 
                 case UserState.AwaitingNewPostTitle:
-                    await userContext.AddNewPost(new Models.Post(messageText));
+                    var newPost = new Post() { Title = messageText, CreatedDate = DateTime.UtcNow, UserId = userContext.UserId, Id = Guid.NewGuid() };
+                    userContext.LastEditedPost = newPost;
+                    _serviceManager.PostService.CreatePost(newPost);
                     return await userContext.ExecuteCommand(_commands[typeof(AddPostContentCommand).GetCommandName()], cancellationToken);
                    
 
                 case UserState.AwaitingNewPostContent:
+                    var lastEditedPost = userContext.LastEditedPost;
+                    if(lastEditedPost is null)
+                    {
+                        return null;
+                    }
 
-                    break;
+                    lastEditedPost.Content = messageText;
+                    _serviceManager.PostService.UpdatePost(lastEditedPost);
+                    return await userContext.ExecuteCommand(_commands[typeof(AddPostReactionsCommand).GetCommandName()], cancellationToken);
 
                 case UserState.AwaitingNewPostReactions:
+                    lastEditedPost = userContext.LastEditedPost;
+                    if (lastEditedPost is null)
+                    {
+                        return null;
+                    }
 
-                    break;
+                    lastEditedPost.Reactions = [];
+                    _serviceManager.PostService.UpdatePost(lastEditedPost);
+                    return await userContext.ExecuteCommand(_commands[typeof(AddPostReactionsCommand).GetCommandName()], cancellationToken);
 
                 case UserState.AwaitingNewPostPhotos:
 

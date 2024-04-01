@@ -9,13 +9,11 @@ namespace Repository
         {
         }
 
-        public IEnumerable<Reaction> GetPostReactions(Guid postId, bool trackChanges)
+        public IEnumerable<Reaction> GetPostReactions(Guid postId, bool trackChanges) => FindByCondition(reaction => reaction.PostID == postId, trackChanges);
+
+        public void SetPostReactions(Guid postId, IEnumerable<Reaction> postReactions)
         {
-            return FindByCondition(reaction => reaction.PostID == postId, trackChanges);
+            throw new NotImplementedException();
         }
-
-        public void Update(Reaction reaction) => base.Update(reaction);
-
-        public void Delete(Reaction reaction) => base.Delete(reaction);
     }
 }

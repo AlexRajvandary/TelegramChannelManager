@@ -1,7 +1,7 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using ChannelManager.API.Commands;
-using ChannelManager.API.Models;
+using Entities.Models;
 
 namespace ChannelManager.API.Services
 {
@@ -15,18 +15,13 @@ namespace ChannelManager.API.Services
             State = UserState.None;
         }
 
+        public Guid UserId { get; set; }
+
         public long ChatId { get; }
 
         public UserState State { get; private set; }
 
-        public List<Post> Posts { get; set; }
-
-        public Post CurrentPost { get; set; }
-
-        public async Task AddNewPost(Post post)
-        {
-            Posts.Add(post);
-        }
+        public Post? LastEditedPost { get; set; }
 
         public async Task CreateTelegramClientAsync(string token, string webhookAdress)
         {

@@ -15,18 +15,14 @@ namespace Service
             _logger = logger;
         }
 
-        public IEnumerable<Reaction> GetAllReactions(bool trackChanges)
+        public IEnumerable<Reaction> GetPostReactions(Guid postId)
         {
-            try
-            {
-                var companies = _repository.ReactionRepository.GetAllReactions(trackChanges);
-                return companies;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Something went wrong in the {nameof(GetAllReactions)} service method {ex}");
-                throw;
-            }
+            throw new NotImplementedException();
+        }
+
+        public void SetPostReactions(Guid postId, IEnumerable<Reaction> reactions)
+        {
+            throw new NotImplementedException();
         }
     }
 }

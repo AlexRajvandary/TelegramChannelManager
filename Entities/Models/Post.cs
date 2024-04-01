@@ -11,7 +11,10 @@ namespace Entities.Models
 
         public string? Content { get; set; }
 
-        [ForeignKey(nameof(Id))]
+        public DateTime? CreatedDate { get; set; }
+
+        [ForeignKey(nameof(User))]
+        [Column("OwnerId")]
         public Guid UserId { get; set; }
 
         public User User { get; set; }

@@ -6,6 +6,6 @@ namespace Contracts
     {
         IEnumerable<Reaction> GetPostReactions(Guid postId, bool trackChanges);
 
-        void Update(Reaction reaction);
+        void SetPostReactions(Guid postId, IEnumerable<Reaction> postReactions);
     }
 }

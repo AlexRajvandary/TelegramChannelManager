@@ -4,6 +4,8 @@ namespace Service.Contracts
 {
     public interface IReactionService
     {
-        IEnumerable<Reaction> GetAllReactions(bool trackChanges);
+        IEnumerable<Reaction> GetPostReactions(Guid postId);
+
+        void SetPostReactions(Guid postId, IEnumerable<Reaction> reactions);
     }
 }
