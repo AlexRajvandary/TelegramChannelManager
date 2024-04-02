@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using ChannelManager.API.Commands;
 using ChannelManager.API.Extensions;
+using Service.Contracts;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
@@ -16,7 +17,8 @@ namespace ChannelManager.API.Services.BotHandlers
         public MainBotHandlers(ITelegramBotClient botClient,
                                IOptions<BotConfiguration> botOptions,
                                ILogger<UpdateHandlers> logger,
-                               IUserContextManager userContextManager) : base(logger, userContextManager)
+                               IUserContextManager userContextManager,
+                               IServiceManager serviceManager) : base(logger, userContextManager, serviceManager)
         {
             _botClient = botClient;
             webhookAddress = botOptions.Value.HostAddress + "/customerBot";

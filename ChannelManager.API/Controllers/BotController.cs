@@ -9,13 +9,6 @@ namespace ChannelManager.API.Controllers;
 [Route("/")]
 public class BotController : ControllerBase
 {
-    private IServiceManager _serviceManager;
-
-    public BotController(IServiceManager serviceManager)
-    {
-        _serviceManager = serviceManager;
-    }
-
     [HttpPost]
     [Route("/mainBot")]
     public async Task<IActionResult> UpdateFromMainBot(
