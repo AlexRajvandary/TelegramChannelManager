@@ -18,6 +18,7 @@ builder.Services.AddHttpClient("telegram_bot_client")
     });
 
 builder.Services.AddSingleton<IUserContextManager, UserContextManager>();
+builder.Services.ConfigureLoggerService();
 builder.Services.AddScoped<MainBotHandlers>();
 builder.Services.AddScoped<CustomerBotHandlers>();
 builder.Services.AddHostedService<ConfigureWebhook>();

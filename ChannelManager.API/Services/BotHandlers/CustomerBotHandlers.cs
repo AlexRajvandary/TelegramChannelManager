@@ -12,6 +12,15 @@ namespace ChannelManager.API.Services.BotHandlers
                                    IUserContextManager userContextManager,
                                    IServiceManager serviceManager) : base(logger, userContextManager, serviceManager)
         {
+            _commands = new Dictionary<string, ICommand>
+            {
+                { typeof(StartCommand).GetCommandName(), new StartCommand() },
+                { typeof(UsageCommand).GetCommandName(), new UsageCommand() },
+                { typeof(CreateNewPostCommand).GetCommandName(), new CreateNewPostCommand() },
+                { typeof(AddPostContentCommand).GetCommandName(), new AddPostContentCommand() },
+                { typeof(AddPostReactionsCommand).GetCommandName(), new AddPostReactionsCommand() },
+                { typeof(AddPostPhotosCommand).GetCommandName(), new AddPostPhotosCommand() }
+            };
         }
 
         public override Task<Message?> BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)

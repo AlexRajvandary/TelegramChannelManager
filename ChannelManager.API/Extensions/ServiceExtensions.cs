@@ -1,4 +1,5 @@
 ﻿using Contracts;
+using LoggerService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Repository;
@@ -31,6 +32,9 @@ namespace ChannelManager.API.Extensions
                 pattern: route,
                 defaults: new { controller = controllerName, action = actionName });
         }
+
+        public static void ConfigureLoggerService(this IServiceCollection services) =>
+                    services.AddSingleton<ILoggerManager, LoggerManager>();
 
         public static void ConfigureRepositoryManager(this IServiceCollection services) =>
                     services.AddScoped<IRepositoryManager, RepositoryManager>();
