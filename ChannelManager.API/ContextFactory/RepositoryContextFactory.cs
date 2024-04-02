@@ -8,14 +8,13 @@ namespace ChannelManager.API.ContextFactory
     {
         public RepositoryContext CreateDbContext(string[] args)
         {
-            //var configuration = new ConfigurationBuilder()
-            //    .SetBasePath(Directory.GetCurrentDirectory())
-            //    .AddJsonFile("appsettings.json")
-            //    .Build();
-            //var builder = new DbContextOptionsBuilder<RepositoryContext>()
-            //.UseSqlServer(configuration.GetConnectionString("sqlConnection"));
-            //return new RepositoryContext(builder.Options);
-
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+            var builder = new DbContextOptionsBuilder<RepositoryContext>().UseNpgsql(configuration.GetConnectionString("sqlConnection"), b => b.MigrationsAssembly("ChannelManager.API"));
+            
+            return new RepositoryContext(builder.Options);
         }
     }
 }

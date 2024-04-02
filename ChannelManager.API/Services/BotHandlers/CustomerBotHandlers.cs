@@ -46,7 +46,7 @@ namespace ChannelManager.API.Services.BotHandlers
                     }
 
                 case UserState.AwaitingNewPostTitle:
-                    var newPost = new Post() { Title = messageText, CreatedDate = DateTime.UtcNow, UserId = userContext.UserId, Id = Guid.NewGuid() };
+                    var newPost = new Post() { Title = messageText, CreatedDate = DateTime.UtcNow, UserId = userContext.UserId };
                     userContext.LastEditedPost = newPost;
                     _serviceManager.PostService.CreatePost(newPost);
                     return await userContext.ExecuteCommand(_commands[typeof(AddPostContentCommand).GetCommandName()], cancellationToken);
