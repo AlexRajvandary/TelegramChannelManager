@@ -1,4 +1,5 @@
 ﻿using Contracts;
+using Entities.Models;
 using Service.Contracts;
 
 namespace Service
@@ -12,6 +13,24 @@ namespace Service
         {
             _repository = repository;
             _logger = logger;
+        }
+
+        public void AddUser(User user)
+        {
+            _repository.UserRepository.CreateUser(user);
+            _logger.LogInfo($"User with chat Id: [{user.ChatId}] is created.");
+        }
+
+        public User? GetUserByChatId(long chatId)
+        {
+            _logger.LogInfo($"User with chat Id: [{chatId}] was retrieved.");
+            return _repository.UserRepository.GetUser(chatId, trackChanges: false);
+        }
+
+        public void UpdateUser(User user)
+        {
+            _logger.LogInfo($"User with chat Id: [{user.ChatId}] was updated.");
+            _repository.UserRepository.UpdateUser(user);
         }
     }
 }

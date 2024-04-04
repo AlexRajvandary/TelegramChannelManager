@@ -7,7 +7,7 @@ namespace ChannelManager.API.Services
 {
     public class UserContext
     {
-        private ITelegramBotClient telegramBotClient;
+        private ITelegramBotClient? telegramBotClient;
 
         public UserContext(long chatId)
         {
@@ -15,7 +15,13 @@ namespace ChannelManager.API.Services
             State = UserState.None;
         }
 
-        public Guid UserId { get; set; }
+        public UserContext(long chatId, UserState userState)
+        {
+            ChatId = chatId;
+            State = userState;
+        }
+
+        public Guid UserId { get; }
 
         public long ChatId { get; }
 
@@ -35,7 +41,7 @@ namespace ChannelManager.API.Services
             return await ExecuteCommand(telegramBotClient, command, cancellationToken);
         }
 
-        public async Task<Message?> ExecuteCommand(ITelegramBotClient telegramBotClient, ICommand command, CancellationToken cancellationToken)
+        public async Task<Message?> ExecuteCommand(ITelegramBotClient? telegramBotClient, ICommand command, CancellationToken cancellationToken)
         {
             if (telegramBotClient == null)
             {

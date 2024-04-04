@@ -1,27 +1,26 @@
-﻿using ChannelManager.API;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using ChannelManager.API.Commands;
 using ChannelManager.API.Extensions;
 using Service.Contracts;
+using Entities.Models;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
     public class MainBotHandlers : UpdateHandlers
     {
         private ITelegramBotClient _botClient;
-        private string webhookAddress;
 
         public MainBotHandlers(ITelegramBotClient botClient,
                                IOptions<BotConfiguration> botOptions,
                                ILogger<UpdateHandlers> logger,
                                IUserContextManager userContextManager,
-                               IServiceManager serviceManager) : base(logger, userContextManager, serviceManager)
+                               IServiceManager serviceManager) : base(logger, botOptions, userContextManager, serviceManager)
         {
             _botClient = botClient;
-            webhookAddress = botOptions.Value.HostAddress + "/customerBot";
+            _webhookAddress += "/mainBot";
 
             _commands = new Dictionary<string, ICommand>
             {
@@ -47,7 +46,17 @@ namespace ChannelManager.API.Services.BotHandlers
 
             if (!_userContextManager.TryGetUserContext(message.Chat.Id, out var userContext))
             {
-                userContext = _userContextManager.CreateNewUserContext(message.Chat.Id);
+                var user = _serviceManager.UserService.GetUserByChatId(message.Chat.Id);
+
+                if (user is not null)
+                {
+                    userContext = await _userContextManager.RestoreUserContextAsync(user, _webhookAddress);
+                }
+                else
+                {
+                    _serviceManager.UserService.AddUser(new Entities.Models.User() { ChatId = message.Chat.Id, State = UserState.None });
+                    userContext = _userContextManager.CreateNewUserContext(message.Chat.Id);
+                }
             }
 
             switch (userContext.State)
@@ -66,7 +75,7 @@ namespace ChannelManager.API.Services.BotHandlers
                 case UserState.AwaitingToken:
                     if (IsCorrectTelegramBotToken(messageText))
                     {
-                        await userContext.CreateTelegramClientAsync(messageText, webhookAddress);
+                        await userContext.CreateTelegramClientAsync(messageText, _webhookAddress);
                     }
                     else
                     {

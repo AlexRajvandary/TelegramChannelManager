@@ -1,6 +1,7 @@
 ﻿using Telegram.Bot.Types;
 using ChannelManager.API.Commands;
 using Service.Contracts;
+using Microsoft.Extensions.Options;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
@@ -9,15 +10,18 @@ namespace ChannelManager.API.Services.BotHandlers
         protected readonly ILogger<UpdateHandlers> _logger;
         protected readonly IUserContextManager _userContextManager;
         protected readonly IServiceManager _serviceManager;
+        protected string _webhookAddress;
         protected Dictionary<string, ICommand> _commands;
-
+        
         public UpdateHandlers(ILogger<UpdateHandlers> logger,
+                              IOptions<BotConfiguration> botOptions,
                               IUserContextManager userContextManager,
                               IServiceManager serviceManager)
         {
             _logger = logger;
             _userContextManager = userContextManager;
             _serviceManager = serviceManager;
+            _webhookAddress = botOptions.Value.HostAddress;
         }
 
         public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)

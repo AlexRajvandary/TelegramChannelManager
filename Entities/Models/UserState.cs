@@ -1,4 +1,4 @@
-﻿namespace ChannelManager.API.Services
+﻿namespace Entities.Models
 {
     public enum UserState
     {

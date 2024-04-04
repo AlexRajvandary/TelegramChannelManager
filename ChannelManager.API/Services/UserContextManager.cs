@@ -1,30 +1,44 @@
-﻿using Telegram.Bot;
+﻿using Entities.Models;
+using System.Collections.Concurrent;
 
 namespace ChannelManager.API.Services
 {
     public class UserContextManager : IUserContextManager
     {
-        private Dictionary<long, UserContext> userContexts;
+        private ConcurrentDictionary<long, UserContext> _userContexts;
 
         public UserContextManager()
         {
-            userContexts = new Dictionary<long, UserContext>();
+            _userContexts = new ConcurrentDictionary<long, UserContext>();
         }
 
         public UserContext CreateNewUserContext(long chatId)
         {
             var userContext = new UserContext(chatId);
-            userContexts.TryAdd(chatId, userContext);
+            _userContexts.TryAdd(chatId, userContext);
+            return userContext;
+        }
+
+        public async Task<UserContext> RestoreUserContextAsync(User user, string? webhookAdress = null)
+        {
+            var userContext = new UserContext(user.ChatId, user.State);
+
+            if (!string.IsNullOrWhiteSpace(user.BotToken) && !string.IsNullOrWhiteSpace(webhookAdress))
+            {
+                await userContext.CreateTelegramClientAsync(user.BotToken, webhookAdress);
+            }
+
+            _userContexts.TryAdd(user.ChatId, userContext);
             return userContext;
         }
 
         public UserContext? GetUserContext(long chatId)
         {
-            if (userContexts == null)
+            if (_userContexts == null)
             {
                 return null;
             }
-            else if (userContexts.TryGetValue(chatId, out var userContext))
+            else if (_userContexts.TryGetValue(chatId, out var userContext))
             {
                 return userContext;
             }
@@ -37,20 +51,7 @@ namespace ChannelManager.API.Services
         public bool TryGetUserContext(long chatId, out UserContext? userContext)
         {
             userContext = GetUserContext(chatId);
-
-            if (userContext == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
-        private Dictionary<long, UserContext> RestoreUserContexts()
-        {
-            return new Dictionary<long, UserContext>();
+            return userContext != null;
         }
     }
 }

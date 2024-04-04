@@ -27,6 +27,8 @@ namespace Repository
 
         public User? GetUser(Guid userId, bool trackChanges) => FindByCondition(user => user.Id == userId, trackChanges).FirstOrDefault();
 
+        public User? GetUser(long chatId, bool trackChanges) => FindByCondition(user => user.ChatId == chatId, trackChanges).FirstOrDefault();
+
         public void UpdateUser(User user) => Update(user);
     }
 }
