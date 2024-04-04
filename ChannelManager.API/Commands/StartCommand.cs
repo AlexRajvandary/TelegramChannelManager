@@ -1,7 +1,7 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types;
-using ChannelManager.API.Services;
+using Entities.Models;
 
 namespace ChannelManager.API.Commands
 {
