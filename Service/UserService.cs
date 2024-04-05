@@ -19,6 +19,7 @@ namespace Service
         {
             _repository.UserRepository.CreateUser(user);
             _logger.LogInfo($"User with chat Id: [{user.ChatId}] is created.");
+            _repository.Save();
         }
 
         public User? GetUserByChatId(long chatId)
@@ -31,6 +32,7 @@ namespace Service
         {
             _logger.LogInfo($"User with chat Id: [{user.ChatId}] was updated.");
             _repository.UserRepository.UpdateUser(user);
+            _repository.Save();
         }
     }
 }

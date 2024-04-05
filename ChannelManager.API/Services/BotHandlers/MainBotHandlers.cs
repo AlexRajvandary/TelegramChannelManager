@@ -20,8 +20,7 @@ namespace ChannelManager.API.Services.BotHandlers
                                IServiceManager serviceManager) : base(logger, botOptions, userContextManager, serviceManager)
         {
             _botClient = botClient;
-            _webhookAddress += "/mainBot";
-
+          
             _commands = new Dictionary<string, ICommand>
             {
                 { typeof(StartCommand).GetCommandName(), new StartCommand() },
@@ -75,7 +74,7 @@ namespace ChannelManager.API.Services.BotHandlers
                 case UserState.AwaitingToken:
                     if (IsCorrectTelegramBotToken(messageText))
                     {
-                        await userContext.CreateTelegramClientAsync(messageText, _webhookAddress);
+                        await userContext.CreateTelegramClientAsync(messageText, _webhookAddress + "/customerBot");
                     }
                     else
                     {

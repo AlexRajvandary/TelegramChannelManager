@@ -11,7 +11,6 @@ namespace Entities.Models
         [Required]
         public long ChatId { get; set; }
 
-        [Required]
         public string? BotToken { get; set; }
 
         public UserState State { get; set; }

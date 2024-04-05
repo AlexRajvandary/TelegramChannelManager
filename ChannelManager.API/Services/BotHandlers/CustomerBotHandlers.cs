@@ -47,6 +47,10 @@ namespace ChannelManager.API.Services.BotHandlers
                 {
                     userContext = await _userContextManager.RestoreUserContextAsync(user, _webhookAddress);
                 }
+                else
+                {
+                    return null;
+                }
             }
 
             switch (userContext.State)
