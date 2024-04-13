@@ -3,6 +3,7 @@ using ChannelManager.API.Services.BotHandlers;
 using ChannelManager.API.Services;
 using ChannelManager.API;
 using Telegram.Bot;
+using Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,12 +26,18 @@ builder.Services.AddHostedService<ConfigureWebhook>();
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureSqlContext(builder.Configuration);
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services
 .AddControllers()
 .AddNewtonsoftJson();
 
 var app = builder.Build();
+var logger = app.Services.GetRequiredService<ILoggerManager>();
+
+app.ConfigureExceptionHandler(logger);
+if (app.Environment.IsProduction())
+    app.UseHsts();
 
 app.MapControllers();
 app.Run();

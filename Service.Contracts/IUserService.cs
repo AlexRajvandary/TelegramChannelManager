@@ -1,11 +1,17 @@
-﻿using Entities.Models;
+﻿using Shared.DataTransferObjects;
 
 namespace Service.Contracts
 {
     public interface IUserService
     {
-        void AddUser(User user);
-        User? GetUserByChatId(long chatId);
-        void UpdateUser(User user);
+        void AddUser(UserDto user);
+
+        UserDto? GetUserByChatId(long chatId);
+
+        UserDto? GetUser(Guid Id);
+
+        IEnumerable<UserDto> GetUsers();
+
+        void UpdateUser(UserDto user);
     }
 }

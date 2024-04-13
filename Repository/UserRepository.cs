@@ -25,9 +25,9 @@ namespace Repository
 
         public IEnumerable<User> GetAllUsers() => FindAll(false);
 
-        public User? GetUser(Guid userId, bool trackChanges) => FindByCondition(user => user.Id == userId, trackChanges).FirstOrDefault();
+        public User? GetUser(Guid userId, bool trackChanges) => FindByCondition(user => user.Id.Equals(userId), trackChanges).SingleOrDefault();
 
-        public User? GetUser(long chatId, bool trackChanges) => FindByCondition(user => user.ChatId == chatId, trackChanges).FirstOrDefault();
+        public User? GetUser(long chatId, bool trackChanges) => FindByCondition(user => user.ChatId.Equals(chatId), trackChanges).SingleOrDefault();
 
         public void UpdateUser(User user) => Update(user);
     }

@@ -1,4 +1,5 @@
-﻿using Contracts;
+﻿using AutoMapper;
+using Contracts;
 using Service.Contracts;
 
 namespace Service
@@ -9,10 +10,10 @@ namespace Service
         private readonly Lazy<IPostService> _postService;
         private readonly Lazy<IReactionService> _reactionService;
 
-        public ServiceManager(IRepositoryManager repositoryManager, ILoggerManager logger)
+        public ServiceManager(IRepositoryManager repositoryManager, ILoggerManager logger, IMapper mapper)
         {
-            _userService = new Lazy<IUserService>(() => new UserService(repositoryManager, logger));
-            _postService = new Lazy<IPostService>(() => new PostService(repositoryManager, logger));
+            _userService = new Lazy<IUserService>(() => new UserService(repositoryManager, logger, mapper));
+            _postService = new Lazy<IPostService>(() => new PostService(repositoryManager, logger, mapper));
             _reactionService = new Lazy<IReactionService>(() => new ReactionService(repositoryManager, logger));
         }
         
