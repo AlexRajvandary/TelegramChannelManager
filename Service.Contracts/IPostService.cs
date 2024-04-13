@@ -1,15 +1,15 @@
-﻿using Entities.Models;
+﻿using Shared.DataTransferObjects;
 
 namespace Service.Contracts
 {
     public interface IPostService
     {
-        void CreatePost(Post post);
+        void CreatePost(PostDTO post);
 
-        void DeletePost(Post post);
+        void DeletePost(PostDTO post);
 
-        void UpdatePost(Post post);
+        void UpdatePost(PostDTO post);
 
-        Post GetPostById(Guid postId);
+        PostDTO GetPostById(Guid postId);
     }
 }

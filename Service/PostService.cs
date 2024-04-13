@@ -1,6 +1,7 @@
 ﻿using Contracts;
 using Entities.Models;
 using Service.Contracts;
+using Shared.DataTransferObjects;
 
 namespace Service
 {
@@ -15,12 +16,12 @@ namespace Service
             _logger = logger;
         }
 
-        public void CreatePost(Post post) => _repository.PostRepository.AddPost(post);
+        public void CreatePost(PostDTO post) => _repository.PostRepository.AddPost(post);
 
-        public void DeletePost(Post post) => _repository.PostRepository.DeletePost(post);
+        public void DeletePost(PostDTO post) => _repository.PostRepository.DeletePost(post);
 
-        public Post? GetPostById(Guid postId) => _repository.PostRepository.GetPost(postId);
+        public PostDTO? GetPostById(Guid postId) => _repository.PostRepository.GetPost(postId);
 
-        public void UpdatePost(Post post) => _repository.PostRepository.UpdatePost(post);
+        public void UpdatePost(PostDTO post) => _repository.PostRepository.UpdatePost(post);
     }
 }
