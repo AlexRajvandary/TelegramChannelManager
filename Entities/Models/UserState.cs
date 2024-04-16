@@ -8,6 +8,7 @@
         AwaitingNewPostTitle,
         AwaitingNewPostContent,
         AwaitingNewPostReactions,
-        AwaitingNewPostPhotos
+        AwaitingNewPostPhotos,
+        AwaitingPostPublishTime
     }
 }

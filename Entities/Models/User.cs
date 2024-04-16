@@ -13,6 +13,8 @@ namespace Entities.Models
 
         public string? BotToken { get; set; }
 
+        public Guid? LastEditedPostId { get; set; }
+
         public UserState State { get; set; }
 
         public ICollection<Post> Posts { get; set; }

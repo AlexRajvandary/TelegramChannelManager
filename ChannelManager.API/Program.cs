@@ -18,7 +18,6 @@ builder.Services.AddHttpClient("telegram_bot_client")
         return new TelegramBotClient(options, httpClient);
     });
 
-builder.Services.AddSingleton<IUserContextManager, UserContextManager>();
 builder.Services.ConfigureLoggerService();
 builder.Services.AddScoped<MainBotHandlers>();
 builder.Services.AddScoped<CustomerBotHandlers>();
