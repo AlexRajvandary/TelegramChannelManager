@@ -42,6 +42,13 @@ namespace ChannelManager.API.Controllers
             return Ok(user);
         }
 
+        [HttpGet]
+        public IActionResult GetUsers()
+        {
+            var user = _serviceManager.UserService.GetUsers();
+            return Ok(user);
+        }
+
         [HttpPut("{id:guid}")]
         public IActionResult UpdateUser(Guid id, 
                                         [FromBody] UserForUpdateDto userForUpdateDto)
