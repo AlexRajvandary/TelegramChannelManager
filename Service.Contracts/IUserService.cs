@@ -4,14 +4,14 @@ namespace Service.Contracts
 {
     public interface IUserService
     {
-        void AddUser(UserDto user);
+        UserDto CreateUser(UserForCreationDto userForCreation);
 
         UserDto? GetUserByChatId(long chatId);
 
-        UserDto? GetUser(Guid Id);
+        UserDto? GetUser(Guid id);
 
         IEnumerable<UserDto> GetUsers();
 
-        void UpdateUser(UserDto user);
+        void UpdateUser(Guid id, UserForUpdateDto userForUpdate, bool trackChanges);
     }
 }

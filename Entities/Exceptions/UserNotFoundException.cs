@@ -1,6 +1,6 @@
 ﻿namespace Entities.Exceptions
 {
-    public sealed class UserNotFoundException : NotFiniteNumberException 
+    public sealed class UserNotFoundException : NotFoundException 
     {
         public UserNotFoundException(Guid userId) 
             : base ($"The user with id: {userId} doesn't exsist in the database.")
