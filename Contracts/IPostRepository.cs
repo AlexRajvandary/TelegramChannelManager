@@ -4,15 +4,13 @@ namespace Contracts
 {
     public interface IPostRepository
     {
-        void AddPost(Post post);
-
-        void DeletePost(Post post);
+        void CreatePostForUser(Guid userId, Post post);
 
         void DeletePost(Guid postId);
 
-        Post? GetPost(Guid postId);
+        IEnumerable<Post>? GetPosts(Guid userId, bool trackChanges);
 
-        IEnumerable<Post> GetPosts(Guid userId);
+        Post? GetPost(Guid userId, Guid postId, bool trackChanges);
 
         void UpdatePost(Post post);
     }

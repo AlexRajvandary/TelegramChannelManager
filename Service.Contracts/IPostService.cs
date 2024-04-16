@@ -4,12 +4,14 @@ namespace Service.Contracts
 {
     public interface IPostService
     {
-        void CreatePost(PostDTO post);
+        PostDto CreatePost(Guid userId, PostForCreationDto post, bool trackChanges);
 
-        void DeletePost(PostDTO post);
+        void DeletePost(Guid userId, Guid postId);
 
-        void UpdatePost(PostDTO post);
+        void UpdatePostForUser(Guid userId, Guid postId, PostForUpdateDto postForUpdate, bool userTrackChanges, bool postTrackChanges);
 
-        PostDTO GetPostById(Guid postId);
+        PostDto? GetPost(Guid userId, Guid postId, bool trackChanges);
+
+        IEnumerable<PostDto>? GetPosts(Guid userId, bool trackChanges);
     }
 }
