@@ -28,6 +28,20 @@ namespace ChannelManager.API.Controllers
             return CreatedAtRoute("GetPostForUser", new { id = createdPost.Id }, createdPost);
         }
 
+        [HttpGet("{id:guid}")]
+        public IActionResult GetPost(Guid userId, Guid id)
+        {
+            var post = _serviceManager.PostService.GetPost(userId, id, trackChanges: false);
+            return Ok(post);
+        }
+
+        [HttpGet]
+        public IActionResult GetPosts(Guid userId)
+        {
+            var posts = _serviceManager.PostService.GetPosts(userId, trackChanges: false);
+            return Ok(posts);
+        }
+
         [HttpPut]
         public IActionResult UpdatePostForUser(Guid userId, Guid id, [FromBody] PostForUpdateDto postForUpdateDto)
         {

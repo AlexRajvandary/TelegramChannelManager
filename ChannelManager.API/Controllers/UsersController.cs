@@ -50,8 +50,7 @@ namespace ChannelManager.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public IActionResult UpdateUser(Guid id, 
-                                        [FromBody] UserForUpdateDto userForUpdateDto)
+        public IActionResult UpdateUser(Guid id, [FromBody] UserForUpdateDto userForUpdateDto)
         {
             if(userForUpdateDto == null)
             {
