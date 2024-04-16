@@ -6,7 +6,7 @@ namespace Contracts
     {
         void CreatePostForUser(Guid userId, Post post);
 
-        void DeletePost(Guid postId);
+        void DeletePost(Post post);
 
         IEnumerable<Post>? GetPosts(Guid userId, bool trackChanges);
 

@@ -6,7 +6,7 @@ namespace Service.Contracts
     {
         PostDto CreatePost(Guid userId, PostForCreationDto post, bool trackChanges);
 
-        void DeletePost(Guid userId, Guid postId);
+        void DeletePost(Guid userId, Guid postId, bool trackChanges);
 
         void UpdatePostForUser(Guid userId, Guid postId, PostForUpdateDto postForUpdate, bool userTrackChanges, bool postTrackChanges);
 

@@ -35,9 +35,22 @@ namespace Service
             return postToReturn;
         }
 
-        public void DeletePost(Guid userId, Guid postId)
+        public void DeletePost(Guid userId, Guid postId, bool trackChanges)
         {
-            throw new NotImplementedException();
+            var user = _repository.UserRepository.GetUser(userId, trackChanges);
+            if(user is null)
+            {
+                throw new UserNotFoundException(userId);
+            }
+
+            var postEntity = _repository.PostRepository.GetPost(userId, postId, trackChanges);
+            if(postEntity is null)
+            {
+                throw new PostNotFoundException(postId);
+            }
+
+            _repository.PostRepository.DeletePost(postEntity);
+            _repository.Save();
         }
 
         public PostDto? GetPost(Guid userId, Guid postId, bool trackChanges)

@@ -25,8 +25,8 @@ namespace Repository
             return FindByCondition(e => e.UserId.Equals(userId), trackChanges).ToList();
         }
 
-        public void DeletePost(Guid postId) => base.Delete(GetPost(postId));
+        public void DeletePost(Post post) => Delete(post);
 
-        public void UpdatePost(Post post) => base.Update(post);
+        public void UpdatePost(Post post) => Update(post);
     }
 }
