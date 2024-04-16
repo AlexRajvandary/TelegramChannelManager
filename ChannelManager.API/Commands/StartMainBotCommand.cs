@@ -1,11 +1,11 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types.ReplyMarkups;
+﻿using Entities.Models;
+using Telegram.Bot;
 using Telegram.Bot.Types;
-using Entities.Models;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ChannelManager.API.Commands
 {
-    public class StartCommand : ICommand
+    public class StartMainBotCommand : ICommand
     {
         public async Task<ExecutedCommandParapms> ExecuteAsync(ITelegramBotClient botClient, ChatId chatId, CancellationToken cancellationToken)
         {
