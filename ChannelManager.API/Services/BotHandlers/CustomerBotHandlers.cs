@@ -4,20 +4,20 @@ using ChannelManager.API.Extensions;
 using Entities.Models;
 using Service.Contracts;
 using Microsoft.Extensions.Options;
+using Shared.DataTransferObjects;
+using Telegram.Bot;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
     public class CustomerBotHandlers : UpdateHandlers
     {
         public CustomerBotHandlers(ILogger<UpdateHandlers> logger,
-                                   IOptions<BotConfiguration> botOptions,
-                                   IUserContextManager userContextManager,
-                                   IServiceManager serviceManager) : base(logger, botOptions, userContextManager, serviceManager)
+                                   IServiceManager serviceManager,
+                                   ITelegramClientsManager clientsManager) : base(logger, serviceManager, clientsManager)
         {
-            _webhookAddress += "/customerBot";
             _commands = new Dictionary<string, ICommand>
             {
-                { typeof(StartCommand).GetCommandName(), new StartCommand() },
+                { typeof(StartMainBotCommand).GetCommandName(), new StartMainBotCommand() },
                 { typeof(UsageCommand).GetCommandName(), new UsageCommand() },
                 { typeof(CreateNewPostCommand).GetCommandName(), new CreateNewPostCommand() },
                 { typeof(AddPostContentCommand).GetCommandName(), new AddPostContentCommand() },
@@ -39,26 +39,19 @@ namespace ChannelManager.API.Services.BotHandlers
                 return null;
             }
 
-            if (!_userContextManager.TryGetUserContext(message.Chat.Id, out var userContext))
-            {
-                var user = _serviceManager.UserService.GetUserByChatId(message.Chat.Id);
+            var userDto = _serviceManager.UserService.GetUserByChatId(message.Chat.Id);
 
-                if (user is not null)
-                {
-                    userContext = await _userContextManager.RestoreUserContextAsync(user, _webhookAddress);
-                }
-                else
-                {
-                    return null;
-                }
+            if(userDto == null)
+            {
+                userDto = _serviceManager.UserService.CreateUser(new UserForCreationDto(message.Chat.Id, null, UserState.None));
             }
 
-            switch (userContext.State)
+            switch (userDto.State)
             {
                 case UserState.None:
                     if (_commands.TryGetValue(messageText, out var command))
                     {
-                        return await userContext.ExecuteCommand(command, cancellationToken);
+                        return await ExecuteCommand(command, cancellationToken);
                     }
                     else
                     {
@@ -67,33 +60,34 @@ namespace ChannelManager.API.Services.BotHandlers
                     }
 
                 case UserState.AwaitingNewPostTitle:
-                    var newPost = new Post() { Title = messageText, CreatedDate = DateTime.UtcNow, UserId = userContext.UserId };
-                    userContext.LastEditedPost = newPost;
-                    _serviceManager.PostService.CreatePost(newPost);
-                    return await userContext.ExecuteCommand(_commands[typeof(AddPostContentCommand).GetCommandName()], cancellationToken);
+                    var newPost = new PostForCreationDto(messageText, "", DateTime.UtcNow);
+                    _serviceManager.PostService.CreatePost(userDto.Id, newPost, trackChanges: false);
+                    return await ExecuteCommand(_commands[typeof(AddPostContentCommand).GetCommandName()], cancellationToken);
 
 
                 case UserState.AwaitingNewPostContent:
-                    var lastEditedPost = userContext.LastEditedPost;
+                    var lastEditedPost = userDto.LastEditedPost;
                     if (lastEditedPost is null)
                     {
                         return null;
                     }
 
                     lastEditedPost.Content = messageText;
-                    _serviceManager.PostService.UpdatePost(lastEditedPost);
-                    return await userContext.ExecuteCommand(_commands[typeof(AddPostReactionsCommand).GetCommandName()], cancellationToken);
+                    var postForUpdate = new PostForUpdateDto(lastEditedPost.Title, messageText, lastEditedPost.CreatedDate.Value);
+                    _serviceManager.PostService.UpdatePostForUser(userDto.Id, lastEditedPost.Id, postForUpdate, false, false);
+                    return await ExecuteCommand(_commands[typeof(AddPostReactionsCommand).GetCommandName()], cancellationToken);
 
                 case UserState.AwaitingNewPostReactions:
-                    lastEditedPost = userContext.LastEditedPost;
-                    if (lastEditedPost is null)
-                    {
-                        return null;
-                    }
+                    //lastEditedPost = userContext.LastEditedPost;
+                    //if (lastEditedPost is null)
+                    //{
+                    //    return null;
+                    //}
 
-                    lastEditedPost.Reactions = [];
-                    _serviceManager.PostService.UpdatePost(lastEditedPost);
-                    return await userContext.ExecuteCommand(_commands[typeof(AddPostReactionsCommand).GetCommandName()], cancellationToken);
+                    //lastEditedPost.Reactions = [];
+                    //_serviceManager.PostService.UpdatePost(lastEditedPost);
+                    //return await userContext.ExecuteCommand(_commands[typeof(AddPostReactionsCommand).GetCommandName()], cancellationToken);
+                    break;
 
                 case UserState.AwaitingNewPostPhotos:
 

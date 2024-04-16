@@ -1,27 +1,25 @@
 ﻿using Telegram.Bot.Types;
 using ChannelManager.API.Commands;
 using Service.Contracts;
-using Microsoft.Extensions.Options;
+using Telegram.Bot;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
     public abstract class UpdateHandlers
     {
         protected readonly ILogger<UpdateHandlers> _logger;
-        protected readonly IUserContextManager _userContextManager;
         protected readonly IServiceManager _serviceManager;
-        protected string _webhookAddress;
+        protected readonly ITelegramClientsManager _clientsManager;
+
         protected Dictionary<string, ICommand> _commands;
         
         public UpdateHandlers(ILogger<UpdateHandlers> logger,
-                              IOptions<BotConfiguration> botOptions,
-                              IUserContextManager userContextManager,
-                              IServiceManager serviceManager)
+                              IServiceManager serviceManager,
+                              ITelegramClientsManager clientsManager)
         {
             _logger = logger;
-            _userContextManager = userContextManager;
             _serviceManager = serviceManager;
-            _webhookAddress = botOptions.Value.HostAddress;
+            _clientsManager = clientsManager;
         }
 
         public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
@@ -50,6 +48,16 @@ namespace ChannelManager.API.Services.BotHandlers
         {
             _logger.LogInformation("Unknown command: {command}", command);
             return Task.CompletedTask;
+        }
+
+        public async Task<ExecutedCommandParapms> ExecuteCommandAsync(long chatId, ITelegramBotClient? telegramBotClient, ICommand command, CancellationToken cancellationToken)
+        {
+            if (telegramBotClient == null)
+            {
+                return null;
+            }
+
+            return await command.ExecuteAsync(telegramBotClient, chatId, cancellationToken);
         }
     }
 }

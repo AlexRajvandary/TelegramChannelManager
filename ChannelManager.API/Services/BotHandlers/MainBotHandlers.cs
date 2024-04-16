@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Options;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using ChannelManager.API.Commands;
 using ChannelManager.API.Extensions;
 using Service.Contracts;
 using Entities.Models;
+using Shared.DataTransferObjects;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
@@ -14,18 +14,17 @@ namespace ChannelManager.API.Services.BotHandlers
         private ITelegramBotClient _botClient;
 
         public MainBotHandlers(ITelegramBotClient botClient,
-                               IOptions<BotConfiguration> botOptions,
                                ILogger<UpdateHandlers> logger,
-                               IUserContextManager userContextManager,
-                               IServiceManager serviceManager) : base(logger, botOptions, userContextManager, serviceManager)
+                               ITelegramClientsManager clientsManager,
+                               IServiceManager serviceManager) : base(logger, serviceManager, clientsManager)
         {
             _botClient = botClient;
           
             _commands = new Dictionary<string, ICommand>
             {
-                { typeof(StartCommand).GetCommandName(), new StartCommand() },
-                { typeof(UsageCommand).GetCommandName(), new UsageCommand() },
-                { typeof(IncorrectTokenCommand).GetCommandName(), new IncorrectTokenCommand() }
+                { typeof(StartMainBotCommand).GetCommandName(), new StartMainBotCommand() },
+                { typeof(IncorrectTokenCommand).GetCommandName(), new IncorrectTokenCommand() },
+                { typeof(BotWasSuccessfullyCreatedCommand).GetCommandName(), new BotWasSuccessfullyCreatedCommand() },
             };
         }
 
@@ -43,27 +42,22 @@ namespace ChannelManager.API.Services.BotHandlers
                 return null;
             }
 
-            if (!_userContextManager.TryGetUserContext(message.Chat.Id, out var userContext))
-            {
-                var user = _serviceManager.UserService.GetUserByChatId(message.Chat.Id);
+            var userDto = _serviceManager.UserService.GetUserByChatId(message.Chat.Id);
 
-                if (user is not null)
-                {
-                    userContext = await _userContextManager.RestoreUserContextAsync(user, _webhookAddress);
-                }
-                else
-                {
-                    _serviceManager.UserService.AddUser(new Entities.Models.User() { ChatId = message.Chat.Id, State = UserState.None });
-                    userContext = _userContextManager.CreateNewUserContext(message.Chat.Id);
-                }
+            if(userDto is null)
+            {
+                var userForCreationDto = new UserForCreationDto(message.Chat.Id, null, UserState.AwaitingToken);
+                _serviceManager.UserService.CreateUser(userForCreationDto);
+                return (await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(StartMainBotCommand).GetCommandName()], cancellationToken)).SentMessage;
             }
 
-            switch (userContext.State)
+            switch (userDto.State)
             {
                 case UserState.None:
                     if (_commands.TryGetValue(messageText, out var command))
                     {
-                        return await userContext.ExecuteCommand(_botClient, command, cancellationToken);
+                        var sentMessageParams = await ExecuteCommandAsync(message.Chat.Id, _botClient, command, cancellationToken);
+                        return sentMessageParams.SentMessage;
                     }
                     else
                     {
@@ -74,28 +68,18 @@ namespace ChannelManager.API.Services.BotHandlers
                 case UserState.AwaitingToken:
                     if (IsCorrectTelegramBotToken(messageText))
                     {
-                        await userContext.CreateTelegramClientAsync(messageText, _webhookAddress + "/customerBot");
+                        var customerBotClient = await _clientsManager.CreateNewBotClientAsync(userDto.Id, messageText, cancellationToken);
+
+                        if(customerBotClient is not null)
+                        {
+                            await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(BotWasSuccessfullyCreatedCommand).GetCommandName()], cancellationToken);
+                        }
                     }
                     else
                     {
-                        await userContext.ExecuteCommand(_botClient, _commands[typeof(IncorrectTokenCommand).GetCommandName()], cancellationToken);
+                        await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(IncorrectTokenCommand).GetCommandName()], cancellationToken);
                     }
                     return null;
-
-                case UserState.BotClientCreated:
-                    if (_commands.TryGetValue(messageText, out command) && command is not StartCommand)
-                    {
-                        return await userContext.ExecuteCommand(_botClient, command, cancellationToken);
-                    }
-                    else if (command is StartCommand)
-                    {
-                        return await userContext.ExecuteCommand(_botClient, _commands[typeof(UsageCommand).GetCommandName()], cancellationToken);
-                    }
-                    else
-                    {
-                        await UnknownCommandAsync(messageText, cancellationToken);
-                        return null;
-                    }
             }
 
             return null;
