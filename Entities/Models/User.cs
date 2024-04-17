@@ -8,8 +8,9 @@ namespace Entities.Models
         [Column("UserId")]
         public Guid Id { get; set; }
 
-        [Required]
-        public long ChatId { get; set; }
+        public long MainChatId { get; set; }
+
+        public long? PersonalChatId { get; set; }
 
         public string? BotToken { get; set; }
 

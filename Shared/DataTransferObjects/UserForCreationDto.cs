@@ -2,4 +2,4 @@
 
 namespace Shared.DataTransferObjects;
 
-public record UserForCreationDto(long ChatId, string? BotToken, UserState State);
+public record UserForCreationDto(long MainChatId, long? PersonalChatId, string? BotToken, UserState State, Guid? LastEditedPost);

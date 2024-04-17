@@ -6,7 +6,9 @@ namespace Service.Contracts
     {
         UserDto CreateUser(UserForCreationDto userForCreation);
 
-        UserDto? GetUserByChatId(long chatId);
+        UserDto? GetUserByPersonalChatId(long chatId);
+
+        UserDto? GetUserByMainChatId(long chatId);
 
         UserDto? GetUser(Guid id);
 

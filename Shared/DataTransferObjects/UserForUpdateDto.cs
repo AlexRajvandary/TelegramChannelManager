@@ -2,4 +2,4 @@
 
 namespace Shared.DataTransferObjects;
 
-public record UserForUpdateDto(long ChatId, string? BotToken, UserState State, Guid? LastEditedPostId);
+public record UserForUpdateDto(long MainChatId, long? PersonalChatId, string? BotToken, UserState State, Guid? LastEditedPost);

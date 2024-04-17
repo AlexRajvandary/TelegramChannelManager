@@ -8,7 +8,9 @@ namespace Contracts
 
         User? GetUser(Guid userId, bool trackChanges);
 
-        User? GetUser(long chatId, bool trackChanges);
+        User? GetUserByMainChatId(long mainChatId, bool trackChanges);
+
+        User? GetUserByPersonalChatId(long customerChatId, bool trackChanges);
 
         IEnumerable<User> GetAllUsers();
 

@@ -38,7 +38,7 @@ namespace ChannelManager.API.Controllers
         [HttpGet("{chatId:long}")]
         public IActionResult GetUser(long chatId)
         {
-            var user = _serviceManager.UserService.GetUserByChatId(chatId);
+            var user = _serviceManager.UserService.GetUserByPersonalChatId(chatId);
             return Ok(user);
         }
 
