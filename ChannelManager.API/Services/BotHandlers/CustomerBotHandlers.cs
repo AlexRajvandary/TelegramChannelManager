@@ -3,9 +3,8 @@ using Telegram.Bot.Types;
 using ChannelManager.API.Extensions;
 using Entities.Models;
 using Service.Contracts;
-using Microsoft.Extensions.Options;
 using Shared.DataTransferObjects;
-using Telegram.Bot;
+using Entities.Exceptions;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
@@ -39,43 +38,52 @@ namespace ChannelManager.API.Services.BotHandlers
                 return null;
             }
 
-            var userDto = _serviceManager.UserService.GetUserByChatId(message.Chat.Id);
+            var userDto = _serviceManager.UserService.GetUserByPersonalChatId(message.Chat.Id) ??
+                          throw new UserNotFoundException(message.Chat.Id);
 
-            if(userDto == null)
-            {
-                userDto = _serviceManager.UserService.CreateUser(new UserForCreationDto(message.Chat.Id, null, UserState.None));
-            }
+            var telegramBotClient = _clientsManager.GetBotClient(userDto.Id);
 
             switch (userDto.State)
             {
                 case UserState.None:
-                    if (_commands.TryGetValue(messageText, out var command))
-                    {
-                        return await ExecuteCommand(command, cancellationToken);
-                    }
-                    else
+                    if (!_commands.TryGetValue(messageText, out var command))
                     {
                         await UnknownCommandAsync(messageText, cancellationToken);
                         return null;
                     }
+                    
+                    var param = await ExecuteCommandAsync(message.Chat.Id, telegramBotClient, command, cancellationToken);
+
+                    var userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, param.UserState, userDto.LastEditedPost);
+                    _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
+                    return param.SentMessage;
 
                 case UserState.AwaitingNewPostTitle:
-                    var newPost = new PostForCreationDto(messageText, "", DateTime.UtcNow);
+                    var newPost = new PostForCreationDto(messageText, null, DateTime.UtcNow);
                     _serviceManager.PostService.CreatePost(userDto.Id, newPost, trackChanges: false);
-                    return await ExecuteCommand(_commands[typeof(AddPostContentCommand).GetCommandName()], cancellationToken);
 
+                    var sentMessageParams = await ExecuteCommandAsync(message.Chat.Id, telegramBotClient, _commands[typeof(AddPostContentCommand).GetCommandName()], cancellationToken);
+
+                    userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, sentMessageParams.UserState, userDto.LastEditedPost);
+                    _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
+                    return sentMessageParams.SentMessage;
 
                 case UserState.AwaitingNewPostContent:
-                    var lastEditedPost = userDto.LastEditedPost;
-                    if (lastEditedPost is null)
+                    var lastEditedPostId = userDto.LastEditedPost;
+                    if (lastEditedPostId is null)
                     {
                         return null;
                     }
 
-                    lastEditedPost.Content = messageText;
-                    var postForUpdate = new PostForUpdateDto(lastEditedPost.Title, messageText, lastEditedPost.CreatedDate.Value);
-                    _serviceManager.PostService.UpdatePostForUser(userDto.Id, lastEditedPost.Id, postForUpdate, false, false);
-                    return await ExecuteCommand(_commands[typeof(AddPostReactionsCommand).GetCommandName()], cancellationToken);
+                    var post = _serviceManager.PostService.GetPost(userDto.Id, lastEditedPostId.Value, false);
+                    var postForUpdate = new PostForUpdateDto(post.Title, messageText, post.CreatedDate);
+                    _serviceManager.PostService.UpdatePostForUser(userDto.Id, lastEditedPostId.Value, postForUpdate, false, true);
+
+                    sentMessageParams = await ExecuteCommandAsync(message.Chat.Id, telegramBotClient, _commands[typeof(AddPostReactionsCommand).GetCommandName()], cancellationToken);
+
+                    userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, sentMessageParams.UserState, userDto.LastEditedPost);
+                    _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
+                    return sentMessageParams.SentMessage;
 
                 case UserState.AwaitingNewPostReactions:
                     //lastEditedPost = userContext.LastEditedPost;

@@ -1,11 +1,11 @@
-﻿using System.Text.RegularExpressions;
+﻿using ChannelManager.API.Commands;
+using ChannelManager.API.Extensions;
+using Entities.Models;
+using Service.Contracts;
+using Shared.DataTransferObjects;
+using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using ChannelManager.API.Commands;
-using ChannelManager.API.Extensions;
-using Service.Contracts;
-using Entities.Models;
-using Shared.DataTransferObjects;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
@@ -19,7 +19,7 @@ namespace ChannelManager.API.Services.BotHandlers
                                IServiceManager serviceManager) : base(logger, serviceManager, clientsManager)
         {
             _botClient = botClient;
-          
+
             _commands = new Dictionary<string, ICommand>
             {
                 { typeof(StartMainBotCommand).GetCommandName(), new StartMainBotCommand() },
@@ -42,11 +42,11 @@ namespace ChannelManager.API.Services.BotHandlers
                 return null;
             }
 
-            var userDto = _serviceManager.UserService.GetUserByChatId(message.Chat.Id);
+            var userDto = _serviceManager.UserService.GetUserByPersonalChatId(message.Chat.Id);
 
-            if(userDto is null)
+            if (userDto is null)
             {
-                var userForCreationDto = new UserForCreationDto(message.Chat.Id, null, UserState.AwaitingToken);
+                var userForCreationDto = new UserForCreationDto(message.Chat.Id, message.Chat.Id, null, UserState.AwaitingToken, null);
                 _serviceManager.UserService.CreateUser(userForCreationDto);
                 return (await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(StartMainBotCommand).GetCommandName()], cancellationToken)).SentMessage;
             }
@@ -66,20 +66,31 @@ namespace ChannelManager.API.Services.BotHandlers
                     }
 
                 case UserState.AwaitingToken:
+
+                    ExecutedCommandParapms param;
+
                     if (IsCorrectTelegramBotToken(messageText))
                     {
                         var customerBotClient = await _clientsManager.CreateNewBotClientAsync(userDto.Id, messageText, cancellationToken);
 
-                        if(customerBotClient is not null)
+                        if (customerBotClient is not null)
                         {
-                            await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(BotWasSuccessfullyCreatedCommand).GetCommandName()], cancellationToken);
+                            param = await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(BotWasSuccessfullyCreatedCommand).GetCommandName()], cancellationToken);
+                        }
+                        else
+                        {
+                            param = new ExecutedCommandParapms(null, UserState.AwaitingToken);
                         }
                     }
                     else
                     {
-                        await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(IncorrectTokenCommand).GetCommandName()], cancellationToken);
+                        param = await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(IncorrectTokenCommand).GetCommandName()], cancellationToken);
                     }
-                    return null;
+
+                    var userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, messageText, UserState.None, null);
+                    _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, trackChanges: true);
+
+                    return param.SentMessage;
             }
 
             return null;
