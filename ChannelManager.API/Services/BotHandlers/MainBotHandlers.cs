@@ -1,5 +1,6 @@
 ﻿using ChannelManager.API.Commands;
 using ChannelManager.API.Extensions;
+using Contracts;
 using Entities.Models;
 using Service.Contracts;
 using Shared.DataTransferObjects;
@@ -14,7 +15,7 @@ namespace ChannelManager.API.Services.BotHandlers
         private ITelegramBotClient _botClient;
 
         public MainBotHandlers(ITelegramBotClient botClient,
-                               ILogger<UpdateHandlers> logger,
+                               ILoggerManager logger,
                                ITelegramClientsManager clientsManager,
                                IServiceManager serviceManager) : base(logger, serviceManager, clientsManager)
         {
@@ -36,13 +37,13 @@ namespace ChannelManager.API.Services.BotHandlers
 
         public override async Task<Message?> BotOnMessageReceived(Message message, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Receive message type: {MessageType}", message.Type);
+            _logger.LogInfo($"Receive message type: {message.Type}");
             if (message.Text is not { } messageText)
             {
                 return null;
             }
 
-            var userDto = _serviceManager.UserService.GetUserByPersonalChatId(message.Chat.Id);
+            var userDto = _serviceManager.UserService.TryGetUserByPersonalChatId(message.Chat.Id);
 
             if (userDto is null)
             {
@@ -54,6 +55,11 @@ namespace ChannelManager.API.Services.BotHandlers
             switch (userDto.State)
             {
                 case UserState.None:
+                    var customerBotClient = _clientsManager.GetBotClient(userDto.Id);
+                    if (customerBotClient is not null)
+                    {
+                        var msg = await customerBotClient.SendTextMessageAsync(userDto.PersonalChatId, "Проверка");
+                    }
                     if (_commands.TryGetValue(messageText, out var command))
                     {
                         var sentMessageParams = await ExecuteCommandAsync(message.Chat.Id, _botClient, command, cancellationToken);
@@ -68,26 +74,29 @@ namespace ChannelManager.API.Services.BotHandlers
                 case UserState.AwaitingToken:
 
                     ExecutedCommandParapms param;
+                    UserForUpdateDto userForUpdate;
 
                     if (IsCorrectTelegramBotToken(messageText))
                     {
-                        var customerBotClient = await _clientsManager.CreateNewBotClientAsync(userDto.Id, messageText, cancellationToken);
+                        customerBotClient = await _clientsManager.TryGetOrCreateNewBotClientAsync(userDto.Id, messageText, cancellationToken);
 
                         if (customerBotClient is not null)
                         {
                             param = await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(BotWasSuccessfullyCreatedCommand).GetCommandName()], cancellationToken);
+                            userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, messageText, param.UserState, userDto.LastEditedPostId);
                         }
                         else
                         {
                             param = new ExecutedCommandParapms(null, UserState.AwaitingToken);
+                            userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, param.UserState, userDto.LastEditedPostId);
                         }
                     }
                     else
                     {
                         param = await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(IncorrectTokenCommand).GetCommandName()], cancellationToken);
+                        userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, param.UserState, userDto.LastEditedPostId);
                     }
 
-                    var userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, messageText, UserState.None, null);
                     _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, trackChanges: true);
 
                     return param.SentMessage;

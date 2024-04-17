@@ -1,23 +1,24 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Contracts;
+using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using Telegram.Bot;
 
 namespace ChannelManager.API.Services
 {
-    public class TelegramClientsManager: ITelegramClientsManager
+    public class TelegramClientsManager : ITelegramClientsManager
     {
         private ConcurrentDictionary<Guid, ITelegramBotClient> telegramBotClients;
         private BotConfiguration _botConfig;
-        private ILogger _logger;
+        private ILoggerManager _logger;
 
-        public TelegramClientsManager(IOptions<BotConfiguration> botOptions, ILogger logger)
+        public TelegramClientsManager(IOptions<BotConfiguration> botOptions, ILoggerManager logger)
         {
             telegramBotClients = new ConcurrentDictionary<Guid, ITelegramBotClient>();
             _botConfig = botOptions.Value;
             _logger = logger;
         }
 
-        public async Task<ITelegramBotClient> CreateNewBotClientAsync(Guid userId, string botToken, CancellationToken cancellationToken)
+        public async Task<ITelegramBotClient> TryGetOrCreateNewBotClientAsync(Guid userId, string botToken, CancellationToken cancellationToken)
         {
             if (telegramBotClients.TryGetValue(userId, out ITelegramBotClient? value))
             {
@@ -27,7 +28,7 @@ namespace ChannelManager.API.Services
             {
                 var userBotClient = new TelegramBotClient(botToken);
                 var webhookAddress = $"{_botConfig.HostAddress}/customerBot";
-                _logger.LogInformation("Setting webhook: {WebhookAddress}", webhookAddress);
+                _logger.LogInfo($"Setting webhook: {webhookAddress}");
                 await userBotClient.SetWebhookAsync(
                     url: webhookAddress,
                     cancellationToken: cancellationToken);

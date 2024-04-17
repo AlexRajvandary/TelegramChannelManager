@@ -4,7 +4,7 @@ namespace ChannelManager.API.Services
 {
     public interface ITelegramClientsManager
     {
-        Task<ITelegramBotClient> CreateNewBotClientAsync(Guid userId, string botToken, CancellationToken cancellationToken);
+        Task<ITelegramBotClient> TryGetOrCreateNewBotClientAsync(Guid userId, string botToken, CancellationToken cancellationToken);
 
         ITelegramBotClient? GetBotClient(Guid userId);
     }

@@ -18,8 +18,8 @@ builder.Services.AddHttpClient("telegram_bot_client")
         return new TelegramBotClient(options, httpClient);
     });
 
-builder.Services.AddSingleton<ITelegramClientsManager, TelegramClientsManager>();
 builder.Services.ConfigureLoggerService();
+builder.Services.AddSingleton<ITelegramClientsManager, TelegramClientsManager>();
 builder.Services.AddScoped<MainBotHandlers>();
 builder.Services.AddScoped<CustomerBotHandlers>();
 builder.Services.AddHostedService<ConfigureWebhook>();

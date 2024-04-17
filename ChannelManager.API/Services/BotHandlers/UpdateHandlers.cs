@@ -2,18 +2,19 @@
 using ChannelManager.API.Commands;
 using Service.Contracts;
 using Telegram.Bot;
+using Contracts;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
     public abstract class UpdateHandlers
     {
-        protected readonly ILogger<UpdateHandlers> _logger;
+        protected readonly ILoggerManager _logger;
         protected readonly IServiceManager _serviceManager;
         protected readonly ITelegramClientsManager _clientsManager;
 
         protected Dictionary<string, ICommand> _commands;
         
-        public UpdateHandlers(ILogger<UpdateHandlers> logger,
+        public UpdateHandlers(ILoggerManager logger,
                               IServiceManager serviceManager,
                               ITelegramClientsManager clientsManager)
         {
@@ -40,13 +41,13 @@ namespace ChannelManager.API.Services.BotHandlers
 
         public Task UnknownUpdateHandlerAsync(Update update, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Unknown update type: {UpdateType}", update.Type);
+            _logger.LogInfo($"Unknown update type: {update.Type}");
             return Task.CompletedTask;
         }
 
         public Task UnknownCommandAsync(string command, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Unknown command: {command}", command);
+            _logger.LogInfo($"Unknown command: {command}");
             return Task.CompletedTask;
         }
 
@@ -54,6 +55,7 @@ namespace ChannelManager.API.Services.BotHandlers
         {
             if (telegramBotClient == null)
             {
+                _logger.LogError($"{nameof(telegramBotClient)} is null");
                 return null;
             }
 
