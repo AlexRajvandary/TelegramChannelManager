@@ -9,6 +9,12 @@ namespace ChannelManager.API.Mapping
         public MappingProfile()
         {
             CreateMap<User, UserDto>();
+            CreateMap<User, UserForUpdateDto>();
+            CreateMap<User, UserForCreationDto>();
+
+            CreateMap<Post, PostDto>();
+            CreateMap<Post, PostForUpdateDto>();
+            CreateMap<Post, PostForCreationDto>();
         }
     }
 }
