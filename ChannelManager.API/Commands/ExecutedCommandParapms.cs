@@ -5,12 +5,7 @@ namespace ChannelManager.API.Commands
 {
     public class ExecutedCommandParapms
     {
-        public ExecutedCommandParapms(Message sentMessage) : this(sentMessage, null)
-        {
-            SentMessage = sentMessage;
-        }
-
-        public ExecutedCommandParapms(Message sentMessage, UserState? userState)
+        public ExecutedCommandParapms(Message sentMessage, UserState userState)
         {
             SentMessage = sentMessage;
             UserState = userState;
@@ -18,6 +13,6 @@ namespace ChannelManager.API.Commands
 
         public Message SentMessage { get; }
 
-        public UserState? UserState { get; }
+        public UserState UserState { get; }
     }
 }

@@ -28,7 +28,7 @@ namespace ChannelManager.API.Commands
                 replyMarkup: inlineKeyboard,
                 cancellationToken: cancellationToken);
 
-            return new ExecutedCommandParapms(message);
+            return new ExecutedCommandParapms(message, Entities.Models.UserState.None);
         }
     }
 

@@ -15,7 +15,7 @@ namespace ChannelManager.API.Commands
                 text: text,
                 cancellationToken: cancellationToken);
 
-            return new ExecutedCommandParapms(message);
+            return new ExecutedCommandParapms(message, Entities.Models.UserState.None);
         }
     }
 }
