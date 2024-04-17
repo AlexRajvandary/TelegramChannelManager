@@ -26,7 +26,7 @@ namespace Service
 
             _repository.UserRepository.CreateUser(userEntity);
             _repository.Save();
-            _logger.LogInfo($"User with chat Id: [{user.ChatId}] is created.");
+            _logger.LogInfo($"User with chat Id: [{user.MainChatId}] is created.");
 
             var userToReturn = _mapper.Map<UserDto>(user);
             return userToReturn;
@@ -45,9 +45,22 @@ namespace Service
             return userDTO;
         }
 
-        public UserDto? GetUserByChatId(long chatId)
+        public UserDto? GetUserByPersonalChatId(long chatId)
         {
-            var userEntity = _repository.UserRepository.GetUser(chatId, trackChanges: false);
+            var userEntity = _repository.UserRepository.GetUserByPersonalChatId(chatId, trackChanges: false);
+            if (userEntity == null)
+            {
+                throw new UserNotFoundException(chatId);
+            }
+
+            _logger.LogInfo($"User with chat Id: [{chatId}] was retrieved.");
+            var userDTO = _mapper.Map<UserDto>(userEntity);
+            return userDTO;
+        }
+
+        public UserDto? GetUserByMainChatId(long chatId)
+        {
+            var userEntity = _repository.UserRepository.GetUserByMainChatId(chatId, trackChanges: false);
             if (userEntity == null)
             {
                 throw new UserNotFoundException(chatId);
@@ -76,7 +89,7 @@ namespace Service
 
             _mapper.Map(userForUpdate, userEntity);
             _repository.Save();
-            _logger.LogInfo($"User with chat Id: [{userForUpdate.ChatId}] was successfully updated.");
+            _logger.LogInfo($"User with chat Id: [{userForUpdate.MainChatId}] was successfully updated.");
         }
     }
 }
