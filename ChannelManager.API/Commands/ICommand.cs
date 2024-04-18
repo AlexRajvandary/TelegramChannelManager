@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using ChannelManager.API.Commands.CustomerBotCommands;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace ChannelManager.API.Commands

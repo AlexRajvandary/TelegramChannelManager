@@ -1,7 +1,7 @@
 ﻿using Telegram.Bot.Types;
 using Entities.Models;
 
-namespace ChannelManager.API.Commands
+namespace ChannelManager.API.Commands.CustomerBotCommands
 {
     public class ExecutedCommandParapms
     {

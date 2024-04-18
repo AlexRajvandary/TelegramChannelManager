@@ -2,7 +2,7 @@
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types;
 
-namespace ChannelManager.API.Commands
+namespace ChannelManager.API.Commands.CustomerBotCommands
 {
     public class MenuCommand : ICommand
     {

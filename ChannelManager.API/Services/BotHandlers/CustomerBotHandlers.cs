@@ -1,4 +1,5 @@
 ﻿using ChannelManager.API.Commands;
+using ChannelManager.API.Commands.CustomerBotCommands;
 using ChannelManager.API.Commands.MainBotCommands;
 using ChannelManager.API.Extensions;
 using Contracts;

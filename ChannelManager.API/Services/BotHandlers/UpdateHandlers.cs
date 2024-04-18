@@ -6,6 +6,7 @@ using Contracts;
 using Entities.Models;
 using Shared.DataTransferObjects;
 using ChannelManager.API.Extensions;
+using ChannelManager.API.Commands.CustomerBotCommands;
 
 namespace ChannelManager.API.Services.BotHandlers
 {

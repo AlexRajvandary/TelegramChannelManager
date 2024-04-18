@@ -1,7 +1,7 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace ChannelManager.API.Commands
+namespace ChannelManager.API.Commands.CustomerBotCommands
 {
     public class UsageCommand : ICommand
     {
