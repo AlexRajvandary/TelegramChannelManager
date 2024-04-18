@@ -3,7 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace ChannelManager.API.Commands
+namespace ChannelManager.API.Commands.MainBotCommands
 {
     public class StartMainBotCommand : ICommand
     {
@@ -26,15 +26,15 @@ namespace ChannelManager.API.Commands
                         }
                     });
 
-             await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: message,
-                replyMarkup: inlineKeyboard,
-                cancellationToken: cancellationToken);
+            await botClient.SendTextMessageAsync(
+               chatId: chatId,
+               text: message,
+               replyMarkup: inlineKeyboard,
+               cancellationToken: cancellationToken);
 
-           var sentMessage = await botClient.SendTextMessageAsync(chatId: chatId,
-                                                                  text: askApiTokenMessage,
-                                                                  cancellationToken: cancellationToken);
+            var sentMessage = await botClient.SendTextMessageAsync(chatId: chatId,
+                                                                   text: askApiTokenMessage,
+                                                                   cancellationToken: cancellationToken);
 
             return new ExecutedCommandParapms(sentMessage, UserState.AwaitingToken);
         }

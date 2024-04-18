@@ -3,6 +3,9 @@ using ChannelManager.API.Commands;
 using Service.Contracts;
 using Telegram.Bot;
 using Contracts;
+using Entities.Models;
+using Shared.DataTransferObjects;
+using ChannelManager.API.Extensions;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
@@ -60,6 +63,17 @@ namespace ChannelManager.API.Services.BotHandlers
             }
 
             return await command.ExecuteAsync(telegramBotClient, chatId, cancellationToken);
+        }
+
+        protected void UpdateUserState(UserState newState, UserDto userDto)
+        {
+            var userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, newState, userDto.LastEditedPostId);
+            _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
+        }
+
+        protected ICommand GetCommand<T>() where T : ICommand
+        {
+            return _commands[typeof(T).GetCommandName()];
         }
     }
 }

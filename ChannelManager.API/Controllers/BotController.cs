@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot.Types;
 using ChannelManager.API.Services.BotHandlers;
-using Service.Contracts;
 
 namespace ChannelManager.API.Controllers;
 

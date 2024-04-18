@@ -1,4 +1,5 @@
 ﻿using ChannelManager.API.Commands;
+using ChannelManager.API.Commands.MainBotCommands;
 using ChannelManager.API.Extensions;
 using Contracts;
 using Entities.Models;
@@ -12,14 +13,17 @@ namespace ChannelManager.API.Services.BotHandlers
 {
     public class MainBotHandlers : UpdateHandlers
     {
-        private ITelegramBotClient _botClient;
+        /// <summary>
+        /// Main bot client for all users.
+        /// </summary>
+        private readonly ITelegramBotClient _mainBotClient;
 
         public MainBotHandlers(ITelegramBotClient botClient,
                                ILoggerManager logger,
                                ITelegramClientsManager clientsManager,
                                IServiceManager serviceManager) : base(logger, serviceManager, clientsManager)
         {
-            _botClient = botClient;
+            _mainBotClient = botClient;
 
             _commands = new Dictionary<string, ICommand>
             {
@@ -49,60 +53,49 @@ namespace ChannelManager.API.Services.BotHandlers
             {
                 var userForCreationDto = new UserForCreationDto(message.Chat.Id, message.Chat.Id, null, UserState.AwaitingToken, null);
                 _serviceManager.UserService.CreateUser(userForCreationDto);
-                return (await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(StartMainBotCommand).GetCommandName()], cancellationToken)).SentMessage;
+                return (await ExecuteCommandAsync(message.Chat.Id, _mainBotClient, _commands[typeof(StartMainBotCommand).GetCommandName()], cancellationToken)).SentMessage;
             }
 
-            switch (userDto.State)
+            return userDto.State switch
             {
-                case UserState.None:
-                    var customerBotClient = _clientsManager.GetBotClient(userDto.Id);
-                    if (customerBotClient is not null)
-                    {
-                        var msg = await customerBotClient.SendTextMessageAsync(userDto.PersonalChatId, "Проверка");
-                    }
-                    if (_commands.TryGetValue(messageText, out var command))
-                    {
-                        var sentMessageParams = await ExecuteCommandAsync(message.Chat.Id, _botClient, command, cancellationToken);
-                        return sentMessageParams.SentMessage;
-                    }
-                    else
-                    {
-                        await UnknownCommandAsync(messageText, cancellationToken);
-                        return null;
-                    }
+                UserState.None => await ExecuteMainMenuCommand(userDto, messageText, cancellationToken),
+                UserState.AwaitingToken => await ExecuteCheckTokenCommand(userDto, messageText, cancellationToken),
+                _ => null,
+            };
+        }
 
-                case UserState.AwaitingToken:
-
-                    ExecutedCommandParapms param;
-                    UserForUpdateDto userForUpdate;
-
-                    if (IsCorrectTelegramBotToken(messageText))
-                    {
-                        customerBotClient = await _clientsManager.TryGetOrCreateNewBotClientAsync(userDto.Id, messageText, cancellationToken);
-
-                        if (customerBotClient is not null)
-                        {
-                            param = await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(BotWasSuccessfullyCreatedCommand).GetCommandName()], cancellationToken);
-                            userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, messageText, param.UserState, userDto.LastEditedPostId);
-                        }
-                        else
-                        {
-                            param = new ExecutedCommandParapms(null, UserState.AwaitingToken);
-                            userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, param.UserState, userDto.LastEditedPostId);
-                        }
-                    }
-                    else
-                    {
-                        param = await ExecuteCommandAsync(message.Chat.Id, _botClient, _commands[typeof(IncorrectTokenCommand).GetCommandName()], cancellationToken);
-                        userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, param.UserState, userDto.LastEditedPostId);
-                    }
-
-                    _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, trackChanges: true);
-
-                    return param.SentMessage;
+        private async Task<Message?> ExecuteMainMenuCommand(UserDto userDto, string messageText, CancellationToken cancellationToken)
+        {
+            if (!_commands.TryGetValue(messageText, out var command))
+            {
+                await UnknownCommandAsync(messageText, cancellationToken);
+                return null;
             }
 
-            return null;
+            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _mainBotClient, command, cancellationToken);
+            UpdateUserState(param.UserState, userDto);
+            return param.SentMessage;
+        }
+
+        private async Task<Message?> ExecuteCheckTokenCommand(UserDto userDto, string messageText, CancellationToken cancellationToken)
+        {
+            ExecutedCommandParapms param;
+            UserForUpdateDto userForUpdate;
+
+            if (!IsCorrectTelegramBotToken(messageText))
+            {
+                param = await ExecuteCommandAsync(userDto.MainChatId, _mainBotClient, GetCommand<IncorrectTokenCommand>(), cancellationToken);
+                UpdateUserState(param.UserState, userDto);
+                return param.SentMessage;
+            }
+
+            _ = await _clientsManager.TryGetOrCreateNewBotClientAsync(userDto.Id, messageText, cancellationToken);
+
+            param = await ExecuteCommandAsync(userDto.MainChatId, _mainBotClient, GetCommand<BotWasSuccessfullyCreatedCommand>(), cancellationToken);
+            userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, messageText, param.UserState, userDto.LastEditedPostId);
+            _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
+
+            return param.SentMessage;
         }
 
         private bool IsCorrectTelegramBotToken(string token)

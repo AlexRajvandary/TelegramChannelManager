@@ -1,18 +1,22 @@
 ﻿using ChannelManager.API.Commands;
-using Telegram.Bot.Types;
+using ChannelManager.API.Commands.MainBotCommands;
 using ChannelManager.API.Extensions;
+using Contracts;
+using Entities.Exceptions;
 using Entities.Models;
 using Service.Contracts;
 using Shared.DataTransferObjects;
-using Entities.Exceptions;
-using Contracts;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
     public class CustomerBotHandlers : UpdateHandlers
     {
-        private ITelegramBotClient? _botClient;
+        /// <summary>
+        /// Bot client for the current user's conversation.
+        /// </summary>
+        private ITelegramBotClient? _currentUserBotClient;
 
         public CustomerBotHandlers(ILoggerManager logger,
                                    IServiceManager serviceManager,
@@ -45,7 +49,7 @@ namespace ChannelManager.API.Services.BotHandlers
             var userDto = _serviceManager.UserService.GetUserByPersonalChatId(message.Chat.Id) ??
                           throw new UserNotFoundException(message.Chat.Id);
 
-            _botClient = await _clientsManager.TryGetOrCreateNewBotClientAsync(userDto.Id, userDto.BotToken, cancellationToken);
+            _currentUserBotClient = await _clientsManager.TryGetOrCreateNewBotClientAsync(userDto.Id, userDto.BotToken, cancellationToken);
 
             return userDto.State switch
             {
@@ -54,8 +58,6 @@ namespace ChannelManager.API.Services.BotHandlers
                 UserState.AwaitingNewPostContent => await ExecutePostContentCreationCommand(userDto, messageText, cancellationToken),
                 UserState.AwaitingNewPostReactions => null,
                 UserState.AwaitingNewPostPhotos => null,
-                UserState.AwaitingToken => null,
-                UserState.BotClientCreated => null,
                 UserState.AwaitingPostPublishTime => null,
                 _ => null,
             };
@@ -69,7 +71,7 @@ namespace ChannelManager.API.Services.BotHandlers
                 return null;
             }
 
-            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _botClient, command, cancellationToken);
+            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _currentUserBotClient, command, cancellationToken);
             UpdateUserState(param.UserState, userDto);
             return param.SentMessage;
         }
@@ -79,7 +81,7 @@ namespace ChannelManager.API.Services.BotHandlers
             var newPost = new PostForCreationDto(messageText, null, DateTime.UtcNow);
             _serviceManager.PostService.CreatePost(userDto.Id, newPost, trackChanges: false);
 
-            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _botClient, GetCommand<AddPostContentCommand>(), cancellationToken);
+            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _currentUserBotClient, GetCommand<AddPostContentCommand>(), cancellationToken);
             UpdateUserState(param.UserState, userDto);
             return param.SentMessage;
         }
@@ -96,21 +98,10 @@ namespace ChannelManager.API.Services.BotHandlers
             var postForUpdate = new PostForUpdateDto(post.Title, messageText, post.CreatedDate);
             _serviceManager.PostService.UpdatePostForUser(userDto.Id, lastEditedPostId.Value, postForUpdate, false, true);
 
-            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _botClient, GetCommand<AddPostReactionsCommand>(), cancellationToken);
+            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _currentUserBotClient, GetCommand<AddPostReactionsCommand>(), cancellationToken);
             UpdateUserState(param.UserState, userDto);
 
             return param.SentMessage;
-        }
-
-        private void UpdateUserState(UserState newState, UserDto userDto)
-        {
-            var userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, newState, userDto.LastEditedPostId);
-            _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
-        }
-
-        private ICommand GetCommand<T>() where T : ICommand
-        {
-            return _commands[typeof(T).GetCommandName()];
         }
     }
 }

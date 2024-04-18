@@ -2,7 +2,7 @@
 using Telegram.Bot.Types;
 using Entities.Models;
 
-namespace ChannelManager.API.Commands
+namespace ChannelManager.API.Commands.MainBotCommands
 {
     public class IncorrectTokenCommand : ICommand
     {
