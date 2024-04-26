@@ -6,7 +6,6 @@ using Contracts;
 using Entities.Models;
 using Shared.DataTransferObjects;
 using ChannelManager.API.Extensions;
-using ChannelManager.API.Commands.CustomerBotCommands;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
@@ -72,9 +71,9 @@ namespace ChannelManager.API.Services.BotHandlers
             _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
         }
 
-        protected ICommand GetCommand<T>() where T : ICommand
+        protected ICommand GetCommand(Type type)
         {
-            return _commands[typeof(T).GetCommandName()];
+            return _commands[type.GetCommandName()];
         }
     }
 }

@@ -82,7 +82,7 @@ namespace ChannelManager.API.Services.BotHandlers
             var newPost = new PostForCreationDto(messageText, null, DateTime.UtcNow);
             _serviceManager.PostService.CreatePost(userDto.Id, newPost, trackChanges: false);
 
-            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _currentUserBotClient, GetCommand<AddPostContentCommand>(), cancellationToken);
+            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _currentUserBotClient, GetCommand(typeof(AddPostContentCommand)), cancellationToken);
             UpdateUserState(param.UserState, userDto);
             return param.SentMessage;
         }
@@ -99,9 +99,8 @@ namespace ChannelManager.API.Services.BotHandlers
             var postForUpdate = new PostForUpdateDto(post.Title, messageText, post.CreatedDate);
             _serviceManager.PostService.UpdatePostForUser(userDto.Id, lastEditedPostId.Value, postForUpdate, false, true);
 
-            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _currentUserBotClient, GetCommand<AddPostReactionsCommand>(), cancellationToken);
+            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _currentUserBotClient, GetCommand(typeof(AddPostReactionsCommand)), cancellationToken);
             UpdateUserState(param.UserState, userDto);
-
             return param.SentMessage;
         }
     }

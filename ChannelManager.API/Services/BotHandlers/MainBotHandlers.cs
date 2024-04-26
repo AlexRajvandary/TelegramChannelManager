@@ -1,5 +1,4 @@
 ﻿using ChannelManager.API.Commands;
-using ChannelManager.API.Commands.CustomerBotCommands;
 using ChannelManager.API.Commands.MainBotCommands;
 using ChannelManager.API.Extensions;
 using Contracts;
@@ -54,7 +53,7 @@ namespace ChannelManager.API.Services.BotHandlers
             {
                 var userForCreationDto = new UserForCreationDto(message.Chat.Id, message.Chat.Id, null, UserState.AwaitingToken, null);
                 _serviceManager.UserService.CreateUser(userForCreationDto);
-                return (await ExecuteCommandAsync(message.Chat.Id, _mainBotClient, _commands[typeof(StartMainBotCommand).GetCommandName()], cancellationToken)).SentMessage;
+                return (await ExecuteCommandAsync(message.Chat.Id, _mainBotClient, GetCommand(typeof(StartMainBotCommand)), cancellationToken)).SentMessage;
             }
 
             return userDto.State switch
@@ -85,14 +84,14 @@ namespace ChannelManager.API.Services.BotHandlers
 
             if (!IsCorrectTelegramBotToken(messageText))
             {
-                param = await ExecuteCommandAsync(userDto.MainChatId, _mainBotClient, GetCommand<IncorrectTokenCommand>(), cancellationToken);
+                param = await ExecuteCommandAsync(userDto.MainChatId, _mainBotClient, GetCommand(typeof(IncorrectTokenCommand)), cancellationToken);
                 UpdateUserState(param.UserState, userDto);
                 return param.SentMessage;
             }
 
             _ = await _clientsManager.TryGetOrCreateNewBotClientAsync(userDto.Id, messageText, cancellationToken);
 
-            param = await ExecuteCommandAsync(userDto.MainChatId, _mainBotClient, GetCommand<BotWasSuccessfullyCreatedCommand>(), cancellationToken);
+            param = await ExecuteCommandAsync(userDto.MainChatId, _mainBotClient, GetCommand(typeof(BotWasSuccessfullyCreatedCommand)), cancellationToken);
             userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, messageText, param.UserState, userDto.LastEditedPostId);
             _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
 

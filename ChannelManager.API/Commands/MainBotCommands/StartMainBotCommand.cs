@@ -1,5 +1,4 @@
-﻿using ChannelManager.API.Commands.CustomerBotCommands;
-using Entities.Models;
+﻿using Entities.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
