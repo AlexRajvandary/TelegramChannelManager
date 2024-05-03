@@ -4,7 +4,7 @@ using Telegram.Bot.Types;
 
 namespace ChannelManager.API.Commands.CustomerBotCommands
 {
-    public class MenuCommand : ICommand
+    public class StartCommand : ICommand
     {
         public async Task<ExecutedCommandParapms> ExecuteAsync(ITelegramBotClient botClient, ChatId chatId, CancellationToken cancellationToken)
         {
@@ -15,12 +15,12 @@ namespace ChannelManager.API.Commands.CustomerBotCommands
                     {
                         new []
                         {
-                            InlineKeyboardButton.WithCallbackData("Создать новый пост", "/newpost")
+                            InlineKeyboardButton.WithCallbackData("Создать новый пост", "/createnewpost")
                         },
 
                         new []
                         {
-                            InlineKeyboardButton.WithCallbackData("Сохранённые посты", "/savedposts"),
+                            InlineKeyboardButton.WithCallbackData("Сохранённые посты", "/showallposts"),
                         }
                     });
 

@@ -39,14 +39,14 @@ namespace ChannelManager.API.Commands.CustomerBotCommands
                            InlineKeyboardButton.WithCallbackData("Сгенерировать заголовок", "/generatetitle"),
                        },
 
-                        new[]
+                       new[]
                        {
                            InlineKeyboardButton.WithCallbackData("Сгенерировать текст", "/generatecontent"),
                        },
 
-                           new []
+                        new []
                         {
-                            InlineKeyboardButton.WithCallbackData("Установить время публикации", "/setposttime"),
+                            InlineKeyboardButton.WithCallbackData("Установить время публикации", "/settime"),
                         },
                    });
 

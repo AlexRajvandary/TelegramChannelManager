@@ -4,7 +4,7 @@ using Entities.Models;
 
 namespace ChannelManager.API.Commands.CustomerBotCommands
 {
-    public class AddPostPublishTimeCommand : ICommand
+    public class SetPostTimeCommand : ICommand
     {
         public async Task<ExecutedCommandParapms> ExecuteAsync(ITelegramBotClient botClient, ChatId chatId, CancellationToken cancellationToken)
         {

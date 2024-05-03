@@ -1,6 +1,5 @@
 ﻿using ChannelManager.API.Commands;
 using ChannelManager.API.Commands.CustomerBotCommands;
-using ChannelManager.API.Commands.MainBotCommands;
 using ChannelManager.API.Extensions;
 using Contracts;
 using Entities.Exceptions;
@@ -25,18 +24,35 @@ namespace ChannelManager.API.Services.BotHandlers
         {
             _commands = new Dictionary<string, ICommand>
             {
-                { typeof(StartMainBotCommand).GetCommandName(), new StartMainBotCommand() },
-                { typeof(UsageCommand).GetCommandName(), new UsageCommand() },
+                { typeof(StartCommand).GetCommandName(), new StartCommand() },
                 { typeof(CreateNewPostCommand).GetCommandName(), new CreateNewPostCommand() },
+                { typeof(ShowAllPostsCommand).GetCommandName(), new ShowAllPostsCommand() },
                 { typeof(AddPostContentCommand).GetCommandName(), new AddPostContentCommand() },
-                { typeof(AddPostReactionsCommand).GetCommandName(), new AddPostReactionsCommand() },
-                { typeof(AddPostPhotosCommand).GetCommandName(), new AddPostPhotosCommand() }
+                { typeof(AddPostTitleCommand).GetCommandName(), new AddPostTitleCommand() },
+                { typeof(AddPostPhotosCommand).GetCommandName(), new AddPostPhotosCommand() },
+                { typeof(SetPostTimeCommand).GetCommandName(), new SetPostTimeCommand() },
+                { typeof(GenerateIdeasCommand).GetCommandName(), new GenerateIdeasCommand() },
             };
         }
 
-        public override Task<Message?> BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)
+        public override async Task<Message?> BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)
         {
-            return null;
+            if(callbackQuery is null)
+            {
+                _logger.LogWarn($"Callback query is null!");
+                return null;
+            }
+
+            var userDto = _serviceManager.UserService.GetUserByPersonalChatId(callbackQuery.From.Id) ??
+                            throw new UserNotFoundException(callbackQuery.From.Id);
+
+            _currentUserBotClient = await _clientsManager.TryGetOrCreateNewBotClientAsync(userDto.Id, userDto.BotToken, cancellationToken);
+
+            return userDto.State switch
+            {
+                UserState.None => await ExecuteMainMenuCommand(userDto, callbackQuery.Data, cancellationToken),
+                _ => null,
+            };
         }
 
         public override async Task<Message?> BotOnMessageReceived(Message message, CancellationToken cancellationToken)
@@ -60,6 +76,7 @@ namespace ChannelManager.API.Services.BotHandlers
                 UserState.AwaitingNewPostReactions => null,
                 UserState.AwaitingNewPostPhotos => null,
                 UserState.AwaitingPostPublishTime => null,
+                UserState.AwaitingPostIdeasPromt => null,
                 _ => null,
             };
         }
@@ -72,9 +89,27 @@ namespace ChannelManager.API.Services.BotHandlers
                 return null;
             }
 
-            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _currentUserBotClient, command, cancellationToken);
+            ExecutedCommandParapms param;
+
+            if (command is ShowAllPostsCommand showAllPostsCommand)
+            {
+                showAllPostsCommand.Posts = _serviceManager.PostService.GetPosts(userDto.Id, false)?.ToList();
+                param = await showAllPostsCommand.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
+            }
+            else if(command is ShowPostCommand showPostCommand)
+            {
+                showPostCommand.Post = _serviceManager.PostService.GetPost(userDto.Id, )
+            }
+            else
+            {
+                param = await command.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
+            }
+
+
+
             UpdateUserState(param.UserState, userDto);
             return param.SentMessage;
+
         }
 
         private async Task<Message?> ExecutePostTitleCreationCommand(UserDto userDto, string messageText, CancellationToken cancellationToken)

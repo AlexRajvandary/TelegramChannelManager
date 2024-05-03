@@ -9,6 +9,7 @@
         AwaitingNewPostContent,
         AwaitingNewPostReactions,
         AwaitingNewPostPhotos,
-        AwaitingPostPublishTime
+        AwaitingPostPublishTime,
+        AwaitingPostIdeasPromt
     }
 }
