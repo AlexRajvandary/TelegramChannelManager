@@ -31,17 +31,17 @@ namespace ChannelManager.API.Services.BotHandlers
         {
             var handler = update switch
             {
-                { Message: { } message } => BotOnMessageReceived(message, cancellationToken),
-                { CallbackQuery: { } callbackQuery } => BotOnCallbackQueryReceived(callbackQuery, cancellationToken),
+                { Message: { } message } => BotOnMessageReceived(message, update.Id, cancellationToken),
+                { CallbackQuery: { } callbackQuery } => BotOnCallbackQueryReceived(callbackQuery, update.Id, cancellationToken),
                 _ => UnknownUpdateHandlerAsync(update, cancellationToken)
             };
 
             await handler;
         }
 
-        public abstract Task<Message?> BotOnMessageReceived(Message message, CancellationToken cancellationToken);
+        public abstract Task<Message?> BotOnMessageReceived(Message message, int updateId, CancellationToken cancellationToken);
 
-        public abstract Task<Message?> BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken);
+        public abstract Task<Message?> BotOnCallbackQueryReceived(CallbackQuery callbackQuery, int updateId, CancellationToken cancellationToken);
 
         public Task UnknownUpdateHandlerAsync(Update update, CancellationToken cancellationToken)
         {
@@ -55,12 +55,12 @@ namespace ChannelManager.API.Services.BotHandlers
             return await telegramBotClient.SendTextMessageAsync(chatId, "Неизвестная комманда");
         }
 
-        protected void UpdateUserState(UserState newState, UserDto userDto) => UpdateUserState(newState, userDto.LastEditedPostId, userDto);
+        protected void UpdateUserState(UserState newState, UserDto userDto) => UpdateUserState(newState, userDto.LastEditedPostId, userDto.LastUpdateId, userDto);
 
-        protected void UpdateUserState(UserState newState, Guid? newLastEditedPostId, UserDto userDto)
+        protected void UpdateUserState(UserState newState, Guid? newLastEditedPostId, int lastUpdateId, UserDto userDto)
         {
             var lastEditedPostId = newLastEditedPostId ?? userDto.LastEditedPostId;
-            var userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, newState, lastEditedPostId);
+            var userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, newState, lastEditedPostId, lastUpdateId);
             _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
         }
 

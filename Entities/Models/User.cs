@@ -16,6 +16,8 @@ namespace Entities.Models
 
         public Guid? LastEditedPostId { get; set; }
 
+        public int UpdateId { get; set; }
+
         public UserState State { get; set; }
 
         public ICollection<Post> Posts { get; set; }

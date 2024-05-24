@@ -33,15 +33,15 @@ namespace ChannelManager.API.Services.BotHandlers
             };
         }
 
-        public override async Task<Message?> BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)
+        public override async Task<Message?> BotOnCallbackQueryReceived(CallbackQuery callbackQuery, int updateId, CancellationToken cancellationToken)
         {
             return await UnknownCommandAsync(callbackQuery.Data, _mainBotClient, callbackQuery.From.Id, cancellationToken);
         }
 
-        public override async Task<Message?> BotOnMessageReceived(Message message, CancellationToken cancellationToken)
+        public override async Task<Message?> BotOnMessageReceived(Message message, int updateId, CancellationToken cancellationToken)
         {
             _logger.LogInfo($"Receive message type: {message.Type}");
-            var command = GetCommand("/start");
+            
             if (message.Text is not { } messageText)
             {
                 return null;
@@ -51,20 +51,28 @@ namespace ChannelManager.API.Services.BotHandlers
 
             if (userDto is null)
             {
-                var userForCreationDto = new UserForCreationDto(message.Chat.Id, message.Chat.Id, null, UserState.AwaitingToken, null);
+                var StartCommand = GetCommand("/start");
+                var userForCreationDto = new UserForCreationDto(message.Chat.Id, message.Chat.Id, null, UserState.AwaitingToken, null, updateId);
                 _serviceManager.UserService.CreateUser(userForCreationDto);
-                return (await command.ExecuteAsync(_mainBotClient, message.Chat.Id, cancellationToken)).SentMessage;
+                return (await StartCommand.ExecuteAsync(_mainBotClient, message.Chat.Id, cancellationToken)).SentMessage;
+            }
+            else
+            {
+                if(userDto.LastUpdateId == updateId)
+                {
+                    return null;
+                }
             }
 
             return userDto.State switch
             {
-                UserState.None => await ExecuteMainMenuCommand(userDto, messageText, cancellationToken),
-                UserState.AwaitingToken => await ExecuteCheckTokenCommand(userDto, messageText, cancellationToken),
+                UserState.None => await ExecuteMainMenuCommand(userDto, messageText, updateId, cancellationToken),
+                UserState.AwaitingToken => await ExecuteCheckTokenCommand(userDto, messageText, updateId, cancellationToken),
                 _ => null,
             };
         }
 
-        private async Task<Message?> ExecuteMainMenuCommand(UserDto userDto, string messageText, CancellationToken cancellationToken)
+        private async Task<Message?> ExecuteMainMenuCommand(UserDto userDto, string messageText, int updateId, CancellationToken cancellationToken)
         {
             if (!_commands.TryGetValue(messageText, out var command))
             {
@@ -76,7 +84,7 @@ namespace ChannelManager.API.Services.BotHandlers
             return param.SentMessage;
         }
 
-        private async Task<Message?> ExecuteCheckTokenCommand(UserDto userDto, string messageText, CancellationToken cancellationToken)
+        private async Task<Message?> ExecuteCheckTokenCommand(UserDto userDto, string messageText, int updateId, CancellationToken cancellationToken)
         {
             ExecutedCommandParapms param;
             UserForUpdateDto userForUpdate;
@@ -94,7 +102,7 @@ namespace ChannelManager.API.Services.BotHandlers
             var botWasCreatedCommand = GetCommand(typeof(BotWasSuccessfullyCreatedCommand));
 
             param = await botWasCreatedCommand.ExecuteAsync(_mainBotClient,userDto.MainChatId, cancellationToken);
-            userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, messageText, param.UserState, userDto.LastEditedPostId);
+            userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, messageText, param.UserState, userDto.LastEditedPostId, updateId);
             _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
 
             return param.SentMessage;
