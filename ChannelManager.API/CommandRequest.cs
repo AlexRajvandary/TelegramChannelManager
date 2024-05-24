@@ -5,7 +5,7 @@ namespace ChannelManager.API
 {
     public class CommandRequest
     {
-        private static readonly Regex _commandParser = new Regex(@"^(?<commandName>[a-zA-Z]+)(:(?<EntityId>[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}))?$");
+        private static readonly Regex _commandParser = new Regex(@"^(?<commandName>/[a-zA-Z]+)(:(?<EntityId>[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}))?$");
 
         private CommandRequest(ICommand command)
         {

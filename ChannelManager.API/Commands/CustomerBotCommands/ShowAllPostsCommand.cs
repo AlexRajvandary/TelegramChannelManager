@@ -19,19 +19,20 @@ namespace ChannelManager.API.Commands.CustomerBotCommands
                 return new ExecutedCommandParapms(sentMessage, UserState.None);
             }
 
-            var keyboard = new List<List<InlineKeyboardButton>>();
-
-            for(var i = 0; i < Posts.Count; i++)
+            var keyboard = new InlineKeyboardButton[Posts.Count][];
+            for (var i = 0; i < Posts.Count; i++)
             {
-                if(i == 101)
+                if (i == 101)
                 {
                     break;
                 }
 
-                keyboard.Add([InlineKeyboardButton.WithCallbackData(Posts[i].Title, $"/showpost:{Posts[i].Id}")]);
+                keyboard[i] = new InlineKeyboardButton[] { InlineKeyboardButton.WithCallbackData(Posts[i].Title, $"/showpost:{Posts[i].Id}") };
             }
 
-            sentMessage = await botClient.SendTextMessageAsync(chatId, "Ваши посты:");
+            var inlineKeyboard = new InlineKeyboardMarkup(keyboard);
+
+            sentMessage = await botClient.SendTextMessageAsync(chatId, "Ваши посты:", replyMarkup: inlineKeyboard);
             return new ExecutedCommandParapms(sentMessage, UserState.None);
         }
     }

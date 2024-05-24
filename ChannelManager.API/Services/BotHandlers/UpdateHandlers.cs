@@ -55,7 +55,7 @@ namespace ChannelManager.API.Services.BotHandlers
             return await telegramBotClient.SendTextMessageAsync(chatId, "Неизвестная комманда");
         }
 
-        protected void UpdateUserState(UserState newState, UserDto userDto) => UpdateUserState(newState, userDto.LastEditedPostId, userDto.LastUpdateId, userDto);
+        protected void UpdateUserState(UserState newState, UserDto userDto) => UpdateUserState(newState, userDto.LastEditedPostId, userDto.UpdateId, userDto);
 
         protected void UpdateUserState(UserState newState, Guid? newLastEditedPostId, int lastUpdateId, UserDto userDto)
         {

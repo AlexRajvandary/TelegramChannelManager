@@ -58,7 +58,7 @@ namespace ChannelManager.API.Services.BotHandlers
             }
             else
             {
-                if(userDto.LastUpdateId == updateId)
+                if(userDto.UpdateId == updateId)
                 {
                     return null;
                 }

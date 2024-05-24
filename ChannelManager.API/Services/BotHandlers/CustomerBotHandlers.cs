@@ -27,6 +27,7 @@ namespace ChannelManager.API.Services.BotHandlers
                 { typeof(StartCommand).GetCommandName(), new StartCommand() },
                 { typeof(CreateNewPostCommand).GetCommandName(), new CreateNewPostCommand() },
                 { typeof(ShowAllPostsCommand).GetCommandName(), new ShowAllPostsCommand() },
+                { typeof(ShowPostCommand).GetCommandName(), new ShowPostCommand() },
                 { typeof(AddPostContentCommand).GetCommandName(), new AddPostContentCommand() },
                 { typeof(AddPostTitleCommand).GetCommandName(), new AddPostTitleCommand() },
                 { typeof(AddPostPhotosCommand).GetCommandName(), new AddPostPhotosCommand() },
@@ -39,7 +40,7 @@ namespace ChannelManager.API.Services.BotHandlers
                                                                         int updateId,
                                                                         CancellationToken cancellationToken)
         {
-            if(callbackQuery is null)
+            if (callbackQuery is null)
             {
                 _logger.LogWarn($"Callback query is null!");
                 return null;
@@ -48,19 +49,24 @@ namespace ChannelManager.API.Services.BotHandlers
             var userDto = _serviceManager.UserService.GetUserByPersonalChatId(callbackQuery.From.Id) ??
                             throw new UserNotFoundException(callbackQuery.From.Id);
 
+            if (userDto.UpdateId == updateId)
+            {
+                return new Message();
+            }
+
             _currentUserBotClient = await _clientsManager.TryGetOrCreateNewBotClientAsync(userDto.Id, userDto.BotToken, cancellationToken);
 
             return userDto.State switch
             {
-                UserState.None => await ExecuteMainMenuCommand(userDto, 
+                UserState.None => await ExecuteMainMenuCommand(userDto,
                                                                callbackQuery.Data,
                                                                updateId,
                                                                cancellationToken),
-                _ => null,
+                _ => new Message(),
             };
         }
 
-        public override async Task<Message?> BotOnMessageReceived(Message message, 
+        public override async Task<Message?> BotOnMessageReceived(Message message,
                                                                   int updateId,
                                                                   CancellationToken cancellationToken)
         {
@@ -73,7 +79,7 @@ namespace ChannelManager.API.Services.BotHandlers
             var userDto = _serviceManager.UserService.GetUserByPersonalChatId(message.Chat.Id) ??
                           throw new UserNotFoundException(message.Chat.Id);
 
-            if(userDto.LastUpdateId == updateId)
+            if (userDto.UpdateId == updateId)
             {
                 return new Message();
             }
@@ -93,7 +99,7 @@ namespace ChannelManager.API.Services.BotHandlers
             };
         }
 
-        private async Task<Message?> ExecuteMainMenuCommand(UserDto userDto, 
+        private async Task<Message?> ExecuteMainMenuCommand(UserDto userDto,
                                                             string messageText,
                                                             int updateId,
                                                             CancellationToken cancellationToken)
@@ -102,11 +108,11 @@ namespace ChannelManager.API.Services.BotHandlers
             ArgumentNullException.ThrowIfNull(nameof(userDto));
             ArgumentException.ThrowIfNullOrWhiteSpace(nameof(messageText));
 
-            if(!CommandRequest.TryParse(messageText, _commands, out var commandRequest))
+            if (!CommandRequest.TryParse(messageText, _commands, out var commandRequest))
             {
-                UpdateUserState(userDto.State, userDto.LastEditedPostId, userDto.LastUpdateId, userDto);
-                await UnknownCommandAsync(messageText, _currentUserBotClient, userDto.PersonalChatId, cancellationToken);
-                throw new InvalidInputException();
+                UpdateUserState(userDto.State, userDto.LastEditedPostId, updateId, userDto);
+                var sentMessage = await UnknownCommandAsync(messageText, _currentUserBotClient, userDto.PersonalChatId, cancellationToken);
+                return sentMessage;
             }
 
             ExecutedCommandParapms param;
@@ -117,19 +123,31 @@ namespace ChannelManager.API.Services.BotHandlers
                 showAllPostsCommand.Posts = _serviceManager.PostService.GetPosts(userDto.Id, false)?.ToList();
                 param = await showAllPostsCommand.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
             }
-            else if(commandRequest.Command is ShowPostCommand showPostCommand)
+            else if (commandRequest.Command is ShowPostCommand showPostCommand)
             {
                 var postId = commandRequest.CommandParameter.Parameter;
                 showPostCommand.Post = _serviceManager.PostService.GetPost(userDto.Id, postId, trackChanges: false) ?? throw new PostNotFoundException(postId);
                 param = await showPostCommand.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
             }
-            else if(commandRequest.Command is CreateNewPostCommand createNewPostCommand)
+            else if (commandRequest.Command is CreateNewPostCommand createNewPostCommand)
             {
                 var postForCreationDto = PostForCreationDto.CreateNewInstance();
                 //Id поста должен генерироваться сам и здесь мы должны его получать и сохранять для дальнейшего использования
                 var postDto = _serviceManager.PostService.CreatePost(userDto.Id, postForCreationDto, trackChanges: false);
                 lastEditedPostId = postDto.Id;
+                createNewPostCommand.PostId = postDto.Id;
                 param = await createNewPostCommand.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
+            }
+            else if (commandRequest.Command is AddPostTitleCommand addPostTitleCommand)
+            {
+                lastEditedPostId = commandRequest.CommandParameter?.Parameter;
+                param = await addPostTitleCommand.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
+
+            }
+            else if (commandRequest.Command is AddPostContentCommand addPostContentCommand)
+            {
+                lastEditedPostId = commandRequest.CommandParameter?.Parameter;
+                param = await addPostContentCommand.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
             }
             else
             {
@@ -141,29 +159,53 @@ namespace ChannelManager.API.Services.BotHandlers
 
         }
 
-        private async Task<Message?> ExecutePostTitleCreationCommand(UserDto userDto, string messageText, CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(nameof(_currentUserBotClient));
-            var command = GetCommand(typeof(AddPostTitleCommand));
-            var param = await command.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
-            UpdateUserState(param.UserState, userDto);
-
-            return param.SentMessage;
-        }
-
-        private async Task<Message?> ExecutePostContentCreationCommand(UserDto userDto, string messageText, CancellationToken cancellationToken)
+        private async Task<Message?> ExecutePostTitleCreationCommand(UserDto userDto, string newPostTitle, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(nameof(_currentUserBotClient));
             ArgumentNullException.ThrowIfNull(nameof(userDto.LastEditedPostId));
 
-            var post = _serviceManager.PostService.GetPost(userDto.Id, userDto.LastEditedPostId.Value, false);
-            var postForUpdate = new PostForUpdateDto(post.Title, messageText, post.CreatedDate);
-            _serviceManager.PostService.UpdatePostForUser(userDto.Id, userDto.LastEditedPostId.Value, postForUpdate, false, true);
+            var postDto = _serviceManager.PostService.GetPost(userDto.Id, userDto.LastEditedPostId.Value, false)
+                            ?? throw new PostNotFoundException(userDto.LastEditedPostId.Value);
 
-            var command = GetCommand(typeof(AddPostReactionsCommand));
+            var updatedPost = new PostForUpdateDto(newPostTitle, postDto.Content, postDto.CreatedDate);
+
+            _serviceManager.PostService.UpdatePostForUser(userDto.Id,
+                                                          postDto.Id,
+                                                          updatedPost,
+                                                          userTrackChanges: false,
+                                                          postTrackChanges: true);
+
+            var command = new TitleUpdatedCommand();
             var param = await command.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
             UpdateUserState(param.UserState, userDto);
+            var showPostCommand = new ShowPostCommand();
+            showPostCommand.Post = new PostDto(postDto.Id, updatedPost.Title, updatedPost.Content, updatedPost.CreatedDate);
+            await showPostCommand.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
+            return param.SentMessage;
+        }
 
+        private async Task<Message?> ExecutePostContentCreationCommand(UserDto userDto, string newPostContent, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(nameof(_currentUserBotClient));
+            ArgumentNullException.ThrowIfNull(nameof(userDto.LastEditedPostId));
+
+            var postDto = _serviceManager.PostService.GetPost(userDto.Id, userDto.LastEditedPostId.Value, false)
+                           ?? throw new PostNotFoundException(userDto.LastEditedPostId.Value);
+
+            var updatedPost = new PostForUpdateDto(postDto.Title, newPostContent, postDto.CreatedDate);
+
+            _serviceManager.PostService.UpdatePostForUser(userDto.Id,
+                                                          postDto.Id,
+                                                          updatedPost,
+                                                          userTrackChanges: false,
+                                                          postTrackChanges: true);
+
+            var command = new ContentUpdatedCommand();
+            var param = await command.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
+            UpdateUserState(param.UserState, userDto);
+            var showPostCommand = new ShowPostCommand();
+            showPostCommand.Post = new PostDto(postDto.Id, updatedPost.Title, updatedPost.Content, updatedPost.CreatedDate);
+            await showPostCommand.ExecuteAsync(_currentUserBotClient, userDto.PersonalChatId, cancellationToken);
             return param.SentMessage;
         }
     }
