@@ -27,7 +27,7 @@ namespace ChannelManager.API.Services.BotHandlers
 
             _commands = new Dictionary<string, ICommand>
             {
-                { typeof(StartMainBotCommand).GetCommandName(), new StartMainBotCommand() },
+                { "/start", new StartMainBotCommand() },
                 { typeof(IncorrectTokenCommand).GetCommandName(), new IncorrectTokenCommand() },
                 { typeof(BotWasSuccessfullyCreatedCommand).GetCommandName(), new BotWasSuccessfullyCreatedCommand() },
             };
@@ -35,13 +35,13 @@ namespace ChannelManager.API.Services.BotHandlers
 
         public override async Task<Message?> BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)
         {
-            await UnknownCommandAsync("Callback", cancellationToken);
-            return null;
+            return await UnknownCommandAsync(callbackQuery.Data, _mainBotClient, callbackQuery.From.Id, cancellationToken);
         }
 
         public override async Task<Message?> BotOnMessageReceived(Message message, CancellationToken cancellationToken)
         {
             _logger.LogInfo($"Receive message type: {message.Type}");
+            var command = GetCommand("/start");
             if (message.Text is not { } messageText)
             {
                 return null;
@@ -53,7 +53,7 @@ namespace ChannelManager.API.Services.BotHandlers
             {
                 var userForCreationDto = new UserForCreationDto(message.Chat.Id, message.Chat.Id, null, UserState.AwaitingToken, null);
                 _serviceManager.UserService.CreateUser(userForCreationDto);
-                return (await ExecuteCommandAsync(message.Chat.Id, _mainBotClient, GetCommand(typeof(StartMainBotCommand)), cancellationToken)).SentMessage;
+                return (await command.ExecuteAsync(_mainBotClient, message.Chat.Id, cancellationToken)).SentMessage;
             }
 
             return userDto.State switch
@@ -68,11 +68,10 @@ namespace ChannelManager.API.Services.BotHandlers
         {
             if (!_commands.TryGetValue(messageText, out var command))
             {
-                await UnknownCommandAsync(messageText, cancellationToken);
-                return null;
+                return await UnknownCommandAsync(messageText, _mainBotClient, userDto.PersonalChatId, cancellationToken);
             }
 
-            var param = await ExecuteCommandAsync(userDto.PersonalChatId, _mainBotClient, command, cancellationToken);
+            var param = await command.ExecuteAsync(_mainBotClient, userDto.PersonalChatId, cancellationToken);
             UpdateUserState(param.UserState, userDto);
             return param.SentMessage;
         }
@@ -84,14 +83,17 @@ namespace ChannelManager.API.Services.BotHandlers
 
             if (!IsCorrectTelegramBotToken(messageText))
             {
-                param = await ExecuteCommandAsync(userDto.MainChatId, _mainBotClient, GetCommand(typeof(IncorrectTokenCommand)), cancellationToken);
+                var command = GetCommand(typeof(IncorrectTokenCommand));
+                param = await command.ExecuteAsync(_mainBotClient, userDto.MainChatId, cancellationToken);
                 UpdateUserState(param.UserState, userDto);
                 return param.SentMessage;
             }
 
             _ = await _clientsManager.TryGetOrCreateNewBotClientAsync(userDto.Id, messageText, cancellationToken);
 
-            param = await ExecuteCommandAsync(userDto.MainChatId, _mainBotClient, GetCommand(typeof(BotWasSuccessfullyCreatedCommand)), cancellationToken);
+            var botWasCreatedCommand = GetCommand(typeof(BotWasSuccessfullyCreatedCommand));
+
+            param = await botWasCreatedCommand.ExecuteAsync(_mainBotClient,userDto.MainChatId, cancellationToken);
             userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, messageText, param.UserState, userDto.LastEditedPostId);
             _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
 

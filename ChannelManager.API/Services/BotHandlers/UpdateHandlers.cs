@@ -6,6 +6,7 @@ using Contracts;
 using Entities.Models;
 using Shared.DataTransferObjects;
 using ChannelManager.API.Extensions;
+using Entities.Exceptions;
 
 namespace ChannelManager.API.Services.BotHandlers
 {
@@ -48,32 +49,36 @@ namespace ChannelManager.API.Services.BotHandlers
             return Task.CompletedTask;
         }
 
-        public Task UnknownCommandAsync(string command, CancellationToken cancellationToken)
+        public async Task<Message> UnknownCommandAsync(string commandName, ITelegramBotClient telegramBotClient, ChatId chatId, CancellationToken cancellationToken)
         {
-            _logger.LogInfo($"Unknown command: {command}");
-            return Task.CompletedTask;
+            _logger.LogInfo($"Unknown command: {commandName}");
+            return await telegramBotClient.SendTextMessageAsync(chatId, "Неизвестная комманда");
         }
 
-        public async Task<ExecutedCommandParapms> ExecuteCommandAsync(long chatId, ITelegramBotClient? telegramBotClient, ICommand command, CancellationToken cancellationToken)
-        {
-            if (telegramBotClient == null)
-            {
-                _logger.LogError($"{nameof(telegramBotClient)} is null");
-                return null;
-            }
+        protected void UpdateUserState(UserState newState, UserDto userDto) => UpdateUserState(newState, userDto.LastEditedPostId, userDto);
 
-            return await command.ExecuteAsync(telegramBotClient, chatId, cancellationToken);
-        }
-
-        protected void UpdateUserState(UserState newState, UserDto userDto)
+        protected void UpdateUserState(UserState newState, Guid? newLastEditedPostId, UserDto userDto)
         {
-            var userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, newState, userDto.LastEditedPostId);
+            var lastEditedPostId = newLastEditedPostId ?? userDto.LastEditedPostId;
+            var userForUpdate = new UserForUpdateDto(userDto.MainChatId, userDto.PersonalChatId, userDto.BotToken, newState, lastEditedPostId);
             _serviceManager.UserService.UpdateUser(userDto.Id, userForUpdate, true);
         }
 
         protected ICommand GetCommand(Type type)
         {
-            return _commands[type.GetCommandName()];
+            if(_commands.TryGetValue(type.GetCommandName(), out var command))
+            {
+                return command;
+            }
+            else
+            {
+                throw new InvalidInputException();
+            }
+        }
+
+        protected ICommand GetCommand(string commandName)
+        {
+            return _commands[commandName];
         }
     }
 }
